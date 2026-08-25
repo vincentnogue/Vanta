@@ -12,9 +12,10 @@ import {
   countries as allCountries, currencies as allCurrencies, getFxRate, calculateFee,
   type Transaction, type PayoutMethod,
 } from '@/data/mockData';
-import { useStore, createTransfer, addRecipient, addMoney, exchangeMoney, nextTxId } from '@/data/store';
+import { useStore, createTransfer, addRecipient, exchangeMoney, nextTxId } from '@/data/store';
 import { useAuth } from '@/data/auth';
 import { StatusBadge } from '@/components/StatusBadge';
+import { PspCheckout } from '@/components/PspCheckout';
 import { X, Monitor, Smartphone as PhoneIcon, Globe as GlobeIcon, MessageSquare, Plus } from 'lucide-react';
 
 const iconMap: Record<string, typeof Home> = {
@@ -796,19 +797,6 @@ function Balances() {
   const { user } = useAuth();
   const kycVerified = user?.kycStatus === 'verified';
   const [showAdd, setShowAdd] = useState(false);
-  const [addCurrency, setAddCurrency] = useState('AED');
-  const [addAmount, setAddAmount] = useState('');
-  const [added, setAdded] = useState(false);
-
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    const amount = parseFloat(addAmount);
-    if (!amount || amount <= 0) return;
-    addMoney(addCurrency, amount);
-    setAdded(true);
-    setAddAmount('');
-    setTimeout(() => { setAdded(false); setShowAdd(false); }, 1200);
-  };
 
   const navItems = [
     { route: 'consumer' as Route, label: t('dash.nav.home'), icon: Home },
@@ -831,27 +819,12 @@ function Balances() {
           </button>
         </div>
 
-        {showAdd && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-            <form onSubmit={handleAdd} className="card p-6 w-full max-w-sm space-y-4 animate-pop">
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-lg font-bold text-vanta-900">{t('bal.addTitle')}</h2>
-                <button type="button" onClick={() => setShowAdd(false)} className="p-1.5 rounded-lg hover:bg-ink-100">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <select value={addCurrency} onChange={(e) => setAddCurrency(e.target.value)} className="input">
-                {balances.map((b) => (
-                  <option key={b.currency} value={b.currency}>{getCurrencyByCode(b.currency)?.flag} {b.currency}</option>
-                ))}
-              </select>
-              <input required type="number" min="1" step="0.01" value={addAmount} onChange={(e) => setAddAmount(e.target.value)} placeholder={t('bal.amount')} className="input" />
-              <button type="submit" className="btn-primary w-full">
-                {added ? <><Check className="w-4 h-4" /> {t('bal.added')}</> : t('bal.confirm')}
-              </button>
-            </form>
-          </div>
-        )}
+        <PspCheckout
+          open={showAdd}
+          currencies={balances.map((b) => b.currency)}
+          defaultCurrency={balances[0]?.currency ?? 'AED'}
+          onClose={() => setShowAdd(false)}
+        />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {balances.map((b) => {

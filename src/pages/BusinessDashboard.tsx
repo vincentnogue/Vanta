@@ -7,7 +7,7 @@ import {
   LayoutDashboard, CreditCard, ArrowLeftRight, Users, Wallet, Repeat,
   Landmark, Users2, Shield, FileBarChart, Settings,
   Upload, Building, TrendingUp, Clock, CheckCircle2, Check, Plus, KeyRound,
-  DollarSign, Activity, Globe, Zap, ArrowUpRight, ArrowDownRight, Smartphone,
+  DollarSign, Activity, Globe, Zap, Smartphone,
 } from 'lucide-react';
 import { formatCurrency, getCurrencyByCode, currencies as allCurrencies, getFxRate } from '@/data/mockData';
 import { useStore } from '@/data/store';
@@ -261,6 +261,27 @@ export function BusinessDashboard() {
                   <div className="text-xs text-ink-400 mt-0.5">{s.label}</div>
                 </div>
               ))}
+            </div>
+
+            {/* PSP payment funnel */}
+            <div className="card p-6">
+              <h3 className="font-display text-lg font-bold text-vanta-900 mb-4">
+                {lang === 'fr' ? 'Entonnoir de paiement' : 'Payment funnel'}
+              </h3>
+              <div className="flex flex-wrap items-center gap-3">
+                {paymentFlow.map((stage, i) => (
+                  <div key={stage.stage} className="flex items-center gap-3">
+                    <div className="min-w-0">
+                      <div className={`font-display text-lg font-bold ${stage.color}`}>{stage.count.toLocaleString()}</div>
+                      <div className="text-xs text-ink-400">{stage.stage}</div>
+                      <div className="mt-1.5 h-1 rounded-full bg-ink-100 overflow-hidden w-24">
+                        <div className="h-full rounded-full bg-vanta-500" style={{ width: `${Math.round((stage.count / paymentFlow[0].count) * 100)}%` }} />
+                      </div>
+                    </div>
+                    {i < paymentFlow.length - 1 && <Repeat className="w-4 h-4 text-ink-300 flex-shrink-0" />}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-6">

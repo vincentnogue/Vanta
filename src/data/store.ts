@@ -84,7 +84,7 @@ export function addRecipient(recipient: Recipient) {
   emit();
 }
 
-export function addMoney(currency: string, amount: number) {
+export function addMoney(currency: string, amount: number, method: Transaction['method'] = 'bank') {
   const depositTx: Transaction = {
     id: nextTxId(),
     recipientName: 'Top-up',
@@ -96,7 +96,7 @@ export function addMoney(currency: string, amount: number) {
     payoutCurrency: currency,
     status: 'completed',
     date: new Date().toISOString(),
-    method: 'bank',
+    method,
   };
   state = {
     ...state,
