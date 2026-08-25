@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useI18n } from '@/i18n/I18nContext';
 import { getCurrencyByCode, formatCurrency } from '@/data/mockData';
-import { addMoney } from '@/data/store';
+import { detectBrand, formatCardNumber, formatExpiry } from '@/data/cardUtils';
+import { addMoney, addPaymentMethod, useStore } from '@/data/store';
 import {
-  X, CreditCard, Smartphone, Landmark, Lock, Check, Loader2, ShieldCheck,
+  X, CreditCard, Smartphone, Landmark, Lock, Check, Loader2, ShieldCheck, Plus,
 } from 'lucide-react';
 
 type PayInMethod = 'card' | 'applepay' | 'googlepay' | 'sepa';
@@ -13,37 +14,25 @@ type Props = {
   open: boolean;
   currencies: string[];
   defaultCurrency: string;
+  defaultMethodId?: string;
   onClose: () => void;
 };
 
-function detectBrand(number: string): string | null {
-  if (/^4/.test(number)) return 'VISA';
-  if (/^(5[1-5]|2[2-7])/.test(number)) return 'MASTERCARD';
-  if (/^3[47]/.test(number)) return 'AMEX';
-  return null;
-}
-
-function formatCardNumber(value: string): string {
-  return value.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
-}
-
-function formatExpiry(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 4);
-  if (digits.length <= 2) return digits;
-  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-}
-
-export function PspCheckout({ open, currencies, defaultCurrency, onClose }: Props) {
+export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId, onClose }: Props) {
   const { t } = useI18n();
+  const { paymentMethods } = useStore();
   const [currency, setCurrency] = useState(defaultCurrency);
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PayInMethod>('card');
   const [phase, setPhase] = useState<Phase>('form');
   const [card, setCard] = useState({ number: '', expiry: '', cvc: '' });
   const [cardError, setCardError] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<string>('new');
+  const [saveCard, setSaveCard] = useState(true);
 
   const brand = useMemo(() => detectBrand(card.number.replace(/\s/g, '')), [card.number]);
   const amountNum = parseFloat(amount);
+  const usingSavedCard = method === 'card' && selectedCardId !== 'new';
 
   useEffect(() => {
     if (open) {
@@ -51,8 +40,12 @@ export function PspCheckout({ open, currencies, defaultCurrency, onClose }: Prop
       setCardError(false);
       setCard({ number: '', expiry: '', cvc: '' });
       setMethod('card');
+      const preferred = paymentMethods.find((p) => p.id === defaultMethodId)
+        ?? paymentMethods.find((p) => p.isDefault);
+      setSelectedCardId(preferred?.id ?? 'new');
+      setSaveCard(true);
     }
-  }, [open]);
+  }, [open, defaultMethodId, paymentMethods]);
 
   useEffect(() => {
     if (!open) return;
@@ -67,7 +60,7 @@ export function PspCheckout({ open, currencies, defaultCurrency, onClose }: Prop
 
   const startPayment = () => {
     if (!amountNum || amountNum <= 0 || phase !== 'form') return;
-    if (method === 'card') {
+    if (method === 'card' && !usingSavedCard) {
       const digits = card.number.replace(/\s/g, '');
       const valid = digits.length >= 15 && card.expiry.length === 5 && card.cvc.length >= 3;
       if (!valid) {
@@ -78,6 +71,19 @@ export function PspCheckout({ open, currencies, defaultCurrency, onClose }: Prop
     setPhase('processing');
     const storeMethod = method === 'sepa' ? 'bank' : 'card';
     setTimeout(() => {
+      if (method === 'card' && !usingSavedCard && saveCard) {
+        const digits = card.number.replace(/\s/g, '');
+        const [mm, yy] = card.expiry.split('/');
+        addPaymentMethod({
+          id: `pm_${Date.now()}`,
+          brand,
+          last4: digits.slice(-4),
+          expMonth: mm,
+          expYear: yy,
+          holder: 'Demo User',
+          isDefault: false,
+        });
+      }
       addMoney(currency, amountNum, storeMethod);
       setPhase('success');
       setTimeout(() => {
@@ -186,51 +192,103 @@ export function PspCheckout({ open, currencies, defaultCurrency, onClose }: Prop
           {/* Card fields */}
           {method === 'card' && (
             <div className="rounded-xl border border-ink-200 p-4 space-y-3 bg-ink-50/40">
-              <div>
-                <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.cardNumber')}</label>
-                <div className="relative">
-                  <input
-                    value={card.number}
-                    onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
-                    placeholder="1234 5678 9012 3456"
-                    inputMode="numeric"
-                    className="input py-2.5 pr-16"
+              {paymentMethods.length > 0 && (
+                <div className="space-y-2">
+                  {paymentMethods.map((pm) => (
+                    <button
+                      type="button"
+                      key={pm.id}
+                      onClick={() => { setSelectedCardId(pm.id); setCardError(false); }}
+                      disabled={phase !== 'form'}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-all ${
+                        selectedCardId === pm.id
+                          ? 'border-vanta-500 bg-vanta-50 ring-1 ring-vanta-500/20'
+                          : 'border-ink-200 bg-white hover:border-ink-300'
+                      }`}
+                    >
+                      <CreditCard className={`w-4 h-4 flex-shrink-0 ${selectedCardId === pm.id ? 'text-vanta-600' : 'text-ink-400'}`} />
+                      <span className="text-sm font-semibold text-ink-800 font-mono">•••• {pm.last4}</span>
+                      <span className="text-[10px] font-bold text-ink-500 border border-ink-300 rounded px-1.5 py-0.5">{pm.brand}</span>
+                      <span className="ml-auto text-xs text-ink-400">{pm.expMonth}/{pm.expYear}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedCardId('new'); setCardError(false); }}
                     disabled={phase !== 'form'}
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                    {brand ? (
-                      <span className="text-[10px] font-bold text-ink-600 border border-ink-300 rounded px-1.5 py-0.5">{brand}</span>
-                    ) : (
-                      <CreditCard className="w-4 h-4 text-ink-300" />
-                    )}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-all ${
+                      selectedCardId === 'new'
+                        ? 'border-vanta-500 bg-vanta-50 ring-1 ring-vanta-500/20'
+                        : 'border-dashed border-ink-300 bg-white hover:border-ink-400'
+                    }`}
+                  >
+                    <Plus className={`w-4 h-4 flex-shrink-0 ${selectedCardId === 'new' ? 'text-vanta-600' : 'text-ink-400'}`} />
+                    <span className={`text-sm font-semibold ${selectedCardId === 'new' ? 'text-vanta-700' : 'text-ink-500'}`}>
+                      {t('pay.newCard')}
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {!usingSavedCard && (
+                <>
+                  <div>
+                    <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.cardNumber')}</label>
+                    <div className="relative">
+                      <input
+                        value={card.number}
+                        onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
+                        placeholder="1234 5678 9012 3456"
+                        inputMode="numeric"
+                        className="input py-2.5 pr-16"
+                        disabled={phase !== 'form'}
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                        {card.number.replace(/\s/g, '').length >= 2 ? (
+                          <span className="text-[10px] font-bold text-ink-600 border border-ink-300 rounded px-1.5 py-0.5">{brand}</span>
+                        ) : (
+                          <CreditCard className="w-4 h-4 text-ink-300" />
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.expiry')}</label>
-                  <input
-                    value={card.expiry}
-                    onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })}
-                    placeholder="MM/YY"
-                    inputMode="numeric"
-                    className="input py-2.5"
-                    disabled={phase !== 'form'}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.cvc')}</label>
-                  <input
-                    value={card.cvc}
-                    onChange={(e) => setCard({ ...card, cvc: e.target.value.replace(/\D/g, '').slice(0, 4) })}
-                    placeholder="CVC"
-                    inputMode="numeric"
-                    className="input py-2.5"
-                    disabled={phase !== 'form'}
-                  />
-                </div>
-              </div>
-              {cardError && <p className="text-xs text-danger-600 font-medium">{t('pay.cardError')}</p>}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.expiry')}</label>
+                      <input
+                        value={card.expiry}
+                        onChange={(e) => setCard({ ...card, expiry: formatExpiry(e.target.value) })}
+                        placeholder="MM/YY"
+                        inputMode="numeric"
+                        className="input py-2.5"
+                        disabled={phase !== 'form'}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.cvc')}</label>
+                      <input
+                        value={card.cvc}
+                        onChange={(e) => setCard({ ...card, cvc: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                        placeholder="CVC"
+                        inputMode="numeric"
+                        className="input py-2.5"
+                        disabled={phase !== 'form'}
+                      />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 text-xs text-ink-500 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saveCard}
+                      onChange={(e) => setSaveCard(e.target.checked)}
+                      disabled={phase !== 'form'}
+                      className="w-3.5 h-3.5 rounded border-ink-300 text-vanta-600 focus:ring-vanta-500"
+                    />
+                    {t('pay.saveCard')}
+                  </label>
+                  {cardError && <p className="text-xs text-danger-600 font-medium">{t('pay.cardError')}</p>}
+                </>
+              )}
             </div>
           )}
 

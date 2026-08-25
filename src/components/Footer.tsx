@@ -2,7 +2,7 @@ import { useI18n } from '@/i18n/I18nContext';
 import { useRouter, type Route } from '@/router/RouterContext';
 import { Logo } from './Logo';
 import { LanguageToggle } from './LanguageToggle';
-import { MapPin, Linkedin, Twitter, Github, Globe, ShieldCheck } from 'lucide-react';
+import { MapPin, Linkedin, Twitter, Github, Globe, ShieldCheck, Mail, Building2 } from 'lucide-react';
 
 export function Footer() {
   const { t } = useI18n();
@@ -14,8 +14,35 @@ export function Footer() {
       links: [
         { label: t('footer.send'), route: 'send' },
         { label: t('footer.exchange'), route: 'exchange' },
-        { label: t('footer.recipients'), route: 'recipients' },
         { label: t('footer.balances'), route: 'balances' },
+        { label: t('footer.cards'), route: 'cards' },
+      ],
+    },
+    {
+      title: t('footer.business'),
+      links: [
+        { label: t('footer.payments'), route: 'business' },
+        { label: t('footer.payroll'), route: 'business' },
+        { label: t('footer.treasury'), route: 'business' },
+        { label: t('footer.api'), route: 'api' },
+      ],
+    },
+    {
+      title: t('footer.developers'),
+      links: [
+        { label: t('footer.docs'), route: 'api' },
+        { label: t('footer.sandbox'), route: 'api' },
+        { label: t('footer.status'), route: 'status' },
+        { label: t('footer.support'), route: 'support' },
+      ],
+    },
+    {
+      title: t('footer.resources'),
+      links: [
+        { label: t('footer.blog'), route: 'blog' },
+        { label: t('footer.status'), route: 'status' },
+        { label: t('footer.support'), route: 'support' },
+        { label: t('footer.contact'), route: 'contact' },
       ],
     },
     {
@@ -23,8 +50,8 @@ export function Footer() {
       links: [
         { label: t('footer.about'), route: 'about' },
         { label: t('footer.careers'), route: 'careers' },
-        { label: t('footer.contact'), route: 'contact' },
         { label: t('footer.press'), route: 'press' },
+        { label: t('footer.contact'), route: 'contact' },
       ],
     },
     {
@@ -36,22 +63,13 @@ export function Footer() {
         { label: t('footer.compliance'), route: 'compliance' },
       ],
     },
-    {
-      title: t('footer.resources'),
-      links: [
-        { label: t('footer.docs'), route: 'api' },
-        { label: t('footer.status'), route: 'status' },
-        { label: t('footer.blog'), route: 'blog' },
-        { label: t('footer.support'), route: 'support' },
-      ],
-    },
   ];
 
   const socials = [
-    { icon: Linkedin, label: 'LinkedIn', href: '#' },
-    { icon: Twitter, label: 'X', href: '#' },
-    { icon: Github, label: 'GitHub', href: '#' },
-    { icon: Globe, label: 'Website', href: '#' },
+    { icon: Linkedin, label: 'LinkedIn', href: 'https://www.linkedin.com/company/vanta-pay' },
+    { icon: Twitter, label: 'X', href: 'https://x.com/vantapay' },
+    { icon: Github, label: 'GitHub', href: 'https://github.com/vincentnogue/Vanta' },
+    { icon: Globe, label: 'Website', href: 'https://vanta.io' },
   ];
 
   return (
@@ -59,7 +77,7 @@ export function Footer() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[150px] bg-vanta-500/8 blur-[120px]" />
 
       <div className="section-padding max-w-7xl mx-auto relative">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 py-14">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-8 py-14">
           {/* Brand column */}
           <div className="col-span-2">
             <Logo dark />
@@ -69,13 +87,15 @@ export function Footer() {
             <p className="mt-3 text-[11px] text-ink-400 max-w-xs leading-relaxed">
               {t('footer.license')}
             </p>
-            <div className="mt-4 flex items-center gap-3 text-[11px] text-ink-400">
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] text-ink-400">
               <span className="inline-flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-vanta-400" />
                 NBB Regulated
               </span>
               <span className="w-1 h-1 rounded-full bg-ink-600" />
               <span>PSD2</span>
+              <span className="w-1 h-1 rounded-full bg-ink-600" />
+              <span>PCI-DSS L1</span>
             </div>
             <div className="mt-5 flex items-center gap-4">
               <LanguageToggle dark />
@@ -84,6 +104,8 @@ export function Footer() {
                   <a
                     key={s.label}
                     href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
                     aria-label={s.label}
                     className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-ink-300 hover:text-accent-400 hover:border-accent-400/30 hover:bg-white/10 transition-all duration-200"
                   >
@@ -114,6 +136,29 @@ export function Footer() {
               </ul>
             </div>
           ))}
+        </div>
+
+        {/* Legal entity & regulatory disclosures (Stripe/Wise style) */}
+        <div className="border-t border-white/8 py-8 grid md:grid-cols-2 gap-6 text-[11px] leading-relaxed text-ink-400">
+          <div className="space-y-2">
+            <p className="font-semibold text-ink-200">{t('footer.entity')}</p>
+            <p>{t('footer.entityReg')}</p>
+            <p className="flex items-start gap-1.5">
+              <Building2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              {t('footer.entityAddress')}
+            </p>
+            <p className="flex items-start gap-1.5">
+              <MapPin className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              {t('footer.entityOffice')}
+            </p>
+          </div>
+          <div className="space-y-2">
+            <p>{t('footer.safeguarding')}</p>
+            <p className="flex items-start gap-1.5">
+              <Mail className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              {t('footer.complaints')}
+            </p>
+          </div>
         </div>
 
         {/* Bottom bar */}

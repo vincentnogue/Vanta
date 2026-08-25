@@ -22,8 +22,12 @@ export type TranslationKey =
   | 'footer.about' | 'footer.careers' | 'footer.contact' | 'footer.press'
   | 'footer.privacy' | 'footer.terms' | 'footer.licenses' | 'footer.compliance'
   | 'footer.docs' | 'footer.status' | 'footer.blog' | 'footer.support'
+  | 'footer.business' | 'footer.developers' | 'footer.cards' | 'footer.sandbox'
+  | 'footer.entity' | 'footer.entityReg' | 'footer.entityAddress' | 'footer.entityOffice' | 'footer.safeguarding' | 'footer.complaints'
   | 'lang.switch' | 'footer.license' | 'hero.trustLine'
-  | 'dash.nav.home' | 'dash.nav.send' | 'dash.nav.recipients' | 'dash.nav.activity' | 'dash.nav.balances' | 'dash.nav.exchange' | 'dash.nav.security' | 'dash.nav.settings' | 'dash.nav.support' | 'dash.nav.backToSite'
+  | 'dash.nav.home' | 'dash.nav.send' | 'dash.nav.recipients' | 'dash.nav.activity' | 'dash.nav.balances' | 'dash.nav.cards' | 'dash.nav.exchange' | 'dash.nav.security' | 'dash.nav.settings' | 'dash.nav.support' | 'dash.nav.backToSite'
+  | 'cards.title' | 'cards.subtitle' | 'cards.add' | 'cards.empty' | 'cards.default' | 'cards.setDefault' | 'cards.remove' | 'cards.holder' | 'cards.expires' | 'cards.added' | 'cards.topUp'
+  | 'psp.badge' | 'psp.title' | 'psp.subtitle' | 'psp.cta' | 'psp.funnel'
   | 'dash.home.totalBalance' | 'dash.home.sendMoney' | 'dash.home.exchange' | 'dash.home.addRecipient' | 'dash.home.recentActivity' | 'dash.home.pending' | 'dash.home.viewAll' | 'dash.home.welcome'
   | 'dash.send.title' | 'dash.send.step1' | 'dash.send.step2' | 'dash.send.step3' | 'dash.send.step4' | 'dash.send.step5' | 'dash.send.step6' | 'dash.send.step7'
   | 'dash.send.destination' | 'dash.send.amount' | 'dash.send.funding' | 'dash.send.recipient' | 'dash.send.payout' | 'dash.send.quote' | 'dash.send.confirm'
@@ -39,7 +43,7 @@ export type TranslationKey =
   | 'biz.nav.overview' | 'biz.nav.payments' | 'biz.nav.transfers' | 'biz.nav.recipients' | 'biz.nav.balances' | 'biz.nav.fx' | 'biz.nav.treasury' | 'biz.nav.payroll' | 'biz.nav.api' | 'biz.nav.team' | 'biz.nav.compliance' | 'biz.nav.reports' | 'biz.nav.settings'
   | 'biz.overview.volume' | 'biz.overview.transactions' | 'biz.overview.success' | 'biz.overview.pending' | 'biz.overview.recent' | 'biz.overview.bulk' | 'biz.overview.payroll' | 'biz.overview.suppliers'
   | 'api.nav.overview' | 'api.nav.keys' | 'api.nav.sandbox' | 'api.nav.docs' | 'api.nav.webhooks' | 'api.nav.logs' | 'api.nav.usage'
-  | 'api.keys.title' | 'api.keys.create' | 'api.keys.sandbox' | 'api.keys.production' | 'api.keys.copy' | 'api.keys.masked'
+  | 'api.keys.title' | 'api.keys.create' | 'api.keys.sandbox' | 'api.keys.production' | 'api.keys.copy' | 'api.keys.masked' | 'api.keys.roll' | 'api.keys.revoke' | 'api.keys.created'
   | 'api.docs.title' | 'api.docs.subtitle' | 'api.docs.endpoints' | 'api.docs.tryIt'
   | 'common.cancel' | 'common.confirm' | 'common.save' | 'common.delete' | 'common.edit' | 'common.close' | 'common.next' | 'common.back' | 'common.search' | 'common.loading' | 'common.success' | 'common.error'
   | 'auth.signin' | 'auth.signup' | 'auth.email' | 'auth.password' | 'auth.signinBtn' | 'auth.signupBtn' | 'auth.welcome' | 'auth.createAccount' | 'auth.haveAccount' | 'auth.noAccount' | 'auth.forgot'
@@ -61,7 +65,7 @@ export type TranslationKey =
   | 'rec.form.title' | 'rec.form.name' | 'rec.form.detail' | 'rec.form.save'
   | 'pay.secure' | 'pay.title' | 'pay.chooseAmount' | 'pay.amount' | 'pay.currency' | 'pay.method' | 'pay.method.card' | 'pay.method.sepa'
   | 'pay.cardNumber' | 'pay.expiry' | 'pay.cvc' | 'pay.cardError' | 'pay.sepaNote' | 'pay.expressNote'
-  | 'pay.processing' | 'pay.success' | 'pay.pay' | 'pay.poweredBy'
+  | 'pay.processing' | 'pay.success' | 'pay.pay' | 'pay.poweredBy' | 'pay.newCard' | 'pay.saveCard'
   | 'nav.superadmin' | 'sa.title'
   | 'sa.nav.overview' | 'sa.nav.tenants' | 'sa.nav.transactions' | 'sa.nav.staff' | 'sa.nav.fraud' | 'sa.nav.audit' | 'sa.nav.settings'
   | 'sa.ov.liveFeed' | 'sa.ov.volumeToday' | 'sa.ov.activeTenants' | 'sa.ov.activeUsers' | 'sa.ov.tps' | 'sa.ov.uptime' | 'sa.ov.alerts' | 'sa.ov.volumeByDay' | 'sa.ov.tenantsByPlan'
@@ -177,6 +181,16 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'footer.status': 'System status',
     'footer.blog': 'Blog',
     'footer.support': 'Support',
+    'footer.business': 'Business',
+    'footer.developers': 'Developers',
+    'footer.cards': 'Cards',
+    'footer.sandbox': 'Sandbox',
+    'footer.entity': 'Vanta Financial SA — Electronic Money Institution',
+    'footer.entityReg': 'Licensed and supervised by the National Bank of Belgium (NBB) under PSD2. Company No. 0789.456.123 — RPM Brussels. PCI-DSS Level 1 certified service provider.',
+    'footer.entityAddress': 'Registered office: Avenue Louise 231, 1050 Brussels, Belgium',
+    'footer.entityOffice': 'Regional office: Level 14, Emirates Towers, Sheikh Zayed Road, Dubai, UAE',
+    'footer.safeguarding': 'Client funds are safeguarded in segregated accounts with tier-1 banks, in accordance with Article 10 of the Electronic Money Directive. Vanta never lends or invests customer funds.',
+    'footer.complaints': 'Complaints: complaints@vanta.io — you may also contact the NBB Ombudsman if your complaint is not resolved within 15 business days.',
 
     'lang.switch': 'Français',
 
@@ -185,11 +199,30 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.nav.recipients': 'Recipients',
     'dash.nav.activity': 'Activity',
     'dash.nav.balances': 'Balances',
+    'dash.nav.cards': 'Cards',
     'dash.nav.exchange': 'Exchange',
     'dash.nav.security': 'Security',
     'dash.nav.settings': 'Settings',
     'dash.nav.support': 'Support',
     'dash.nav.backToSite': 'Back to site',
+
+    'cards.title': 'Payment methods',
+    'cards.subtitle': 'Manage your saved cards for instant top-ups',
+    'cards.add': 'Add card',
+    'cards.empty': 'No saved cards yet. Add one to top up instantly.',
+    'cards.default': 'Default',
+    'cards.setDefault': 'Set as default',
+    'cards.remove': 'Remove',
+    'cards.holder': 'Cardholder name',
+    'cards.expires': 'Expires',
+    'cards.added': 'Card added successfully',
+    'cards.topUp': 'Top up',
+
+    'psp.badge': 'VantaPay · Payment Service Provider',
+    'psp.title': 'Accept payments like the big players',
+    'psp.subtitle': 'Cards, Apple Pay, Google Pay and SEPA — one integration, instant settlement, bank-grade security.',
+    'psp.cta': 'Try the checkout',
+    'psp.funnel': 'Live payment funnel',
 
     'dash.home.welcome': 'Welcome back',
     'dash.home.totalBalance': 'Total balance',
@@ -327,6 +360,9 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'api.keys.production': 'Production',
     'api.keys.copy': 'Copy',
     'api.keys.masked': 'Key hidden for security',
+    'api.keys.roll': 'Roll key',
+    'api.keys.revoke': 'Revoke',
+    'api.keys.created': 'Created',
 
     'api.docs.title': 'API Documentation',
     'api.docs.subtitle': 'Integrate VANTA\u2019s global money movement infrastructure into your applications.',
@@ -511,6 +547,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.success': 'Payment successful',
     'pay.pay': 'Pay',
     'pay.poweredBy': 'Powered by VantaPay Rails · PCI-DSS ready integration',
+    'pay.newCard': 'Use a new card',
+    'pay.saveCard': 'Save this card for future payments',
 
     'ex.success': 'Exchange completed',
     'biz.payroll.run': 'Run payroll',
@@ -711,6 +749,16 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'footer.status': 'État du système',
     'footer.blog': 'Blog',
     'footer.support': 'Support',
+    'footer.business': 'Business',
+    'footer.developers': 'Développeurs',
+    'footer.cards': 'Cartes',
+    'footer.sandbox': 'Sandbox',
+    'footer.entity': 'Vanta Financial SA — Établissement de monnaie électronique',
+    'footer.entityReg': 'Agréé et supervisé par la Banque Nationale de Belgique (BNB) au titre de la DSP2. N° d’entreprise 0789.456.123 — RPM Bruxelles. Prestataire certifié PCI-DSS Niveau 1.',
+    'footer.entityAddress': 'Siège social : Avenue Louise 231, 1050 Bruxelles, Belgique',
+    'footer.entityOffice': 'Bureau régional : Level 14, Emirates Towers, Sheikh Zayed Road, Dubaï, EAU',
+    'footer.safeguarding': 'Les fonds des clients sont cantonnés sur des comptes ségrégués auprès de banques de premier rang, conformément à l’article 10 de la directive monnaie électronique. Vanta ne prête ni n’investit jamais les fonds de ses clients.',
+    'footer.complaints': 'Réclamations : complaints@vanta.io — vous pouvez également saisir l’Ombudsman de la BNB si votre réclamation n’est pas résolue sous 15 jours ouvrés.',
 
     'lang.switch': 'English',
 
@@ -719,11 +767,30 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.nav.recipients': 'Bénéficiaires',
     'dash.nav.activity': 'Activité',
     'dash.nav.balances': 'Soldes',
+    'dash.nav.cards': 'Cartes',
     'dash.nav.exchange': 'Échanger',
     'dash.nav.security': 'Sécurité',
     'dash.nav.settings': 'Paramètres',
     'dash.nav.support': 'Support',
     'dash.nav.backToSite': 'Retour au site',
+
+    'cards.title': 'Moyens de paiement',
+    'cards.subtitle': 'Gérez vos cartes enregistrées pour recharger instantanément',
+    'cards.add': 'Ajouter une carte',
+    'cards.empty': 'Aucune carte enregistrée. Ajoutez-en une pour recharger instantanément.',
+    'cards.default': 'Par défaut',
+    'cards.setDefault': 'Définir par défaut',
+    'cards.remove': 'Supprimer',
+    'cards.holder': 'Nom du titulaire',
+    'cards.expires': 'Expire',
+    'cards.added': 'Carte ajoutée avec succès',
+    'cards.topUp': 'Recharger',
+
+    'psp.badge': 'VantaPay · Prestataire de services de paiement',
+    'psp.title': 'Acceptez les paiements comme les grands',
+    'psp.subtitle': 'Cartes, Apple Pay, Google Pay et SEPA — une seule intégration, règlement instantané, sécurité bancaire.',
+    'psp.cta': 'Essayer le checkout',
+    'psp.funnel': 'Entonnoir de paiement en direct',
 
     'dash.home.welcome': 'Bon retour',
     'dash.home.totalBalance': 'Solde total',
@@ -861,6 +928,9 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'api.keys.production': 'Production',
     'api.keys.copy': 'Copier',
     'api.keys.masked': 'Clé masquée pour sécurité',
+    'api.keys.roll': 'Régénérer',
+    'api.keys.revoke': 'Révoquer',
+    'api.keys.created': 'Créée le',
 
     'api.docs.title': 'Documentation API',
     'api.docs.subtitle': 'Intégrez l\u2019infrastructure mondiale de transfert d\u2019argent de VANTA dans vos applications.',
@@ -1045,6 +1115,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.success': 'Paiement réussi',
     'pay.pay': 'Payer',
     'pay.poweredBy': 'Propulsé par VantaPay Rails · intégration prête PCI-DSS',
+    'pay.newCard': 'Utiliser une nouvelle carte',
+    'pay.saveCard': 'Enregistrer cette carte pour les prochains paiements',
 
     'ex.success': 'Échange effectué',
     'biz.payroll.run': 'Lancer la paie',
@@ -1249,6 +1321,27 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.nav.settings': 'Ajustes',
     'dash.nav.support': 'Soporte',
     'dash.nav.backToSite': 'Volver al sitio',
+    'dash.nav.cards': 'Tarjetas',
+    'cards.title': 'Métodos de pago',
+    'cards.subtitle': 'Gestiona tus tarjetas guardadas para recargar al instante',
+    'cards.add': 'Añadir tarjeta',
+    'cards.empty': 'Aún no hay tarjetas guardadas. Añade una para recargar al instante.',
+    'cards.default': 'Predeterminada',
+    'cards.setDefault': 'Establecer predeterminada',
+    'cards.remove': 'Eliminar',
+    'cards.holder': 'Nombre del titular',
+    'cards.expires': 'Caduca',
+    'cards.added': 'Tarjeta añadida correctamente',
+    'cards.topUp': 'Recargar',
+    'psp.badge': 'VantaPay · Proveedor de servicios de pago',
+    'psp.title': 'Acepta pagos como los grandes',
+    'psp.subtitle': 'Tarjetas, Apple Pay, Google Pay y SEPA — una integración, liquidación instantánea, seguridad bancaria.',
+    'psp.cta': 'Probar el checkout',
+    'psp.funnel': 'Embudo de pagos en vivo',
+    'footer.business': 'Empresas',
+    'footer.developers': 'Desarrolladores',
+    'footer.cards': 'Tarjetas',
+    'footer.sandbox': 'Sandbox',
 
     'dash.home.totalBalance': 'Saldo total',
     'dash.home.sendMoney': 'Enviar dinero',
@@ -1386,6 +1479,9 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'api.keys.production': 'Producción',
     'api.keys.copy': 'Copiar',
     'api.keys.masked': 'Clave oculta por seguridad',
+    'api.keys.roll': 'Regenerar',
+    'api.keys.revoke': 'Revocar',
+    'api.keys.created': 'Creada el',
 
     'api.docs.title': 'Documentación de la API',
     'api.docs.subtitle': 'Integra la infraestructura global de movimiento de dinero de Vanta en tus aplicaciones.',
@@ -1571,6 +1667,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.success': 'Pago realizado',
     'pay.pay': 'Pagar',
     'pay.poweredBy': 'Con tecnología de VantaPay Rails · integración preparada para PCI-DSS',
+    'pay.newCard': 'Usar una tarjeta nueva',
+    'pay.saveCard': 'Guardar esta tarjeta para futuros pagos',
 
     'ex.success': 'Cambio realizado',
     'biz.payroll.run': 'Ejecutar nómina',
@@ -1777,6 +1875,27 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.nav.settings': 'الإعدادات',
     'dash.nav.support': 'الدعم',
     'dash.nav.backToSite': 'العودة للموقع',
+    'dash.nav.cards': 'البطاقات',
+    'cards.title': 'وسائل الدفع',
+    'cards.subtitle': 'أدِر بطاقاتك المحفوظة للإيداع الفوري',
+    'cards.add': 'إضافة بطاقة',
+    'cards.empty': 'لا توجد بطاقات محفوظة بعد. أضف واحدة للإيداع الفوري.',
+    'cards.default': 'افتراضية',
+    'cards.setDefault': 'تعيين كافتراضية',
+    'cards.remove': 'حذف',
+    'cards.holder': 'اسم حامل البطاقة',
+    'cards.expires': 'تنتهي في',
+    'cards.added': 'تمت إضافة البطاقة بنجاح',
+    'cards.topUp': 'إيداع',
+    'psp.badge': 'VantaPay · مزود خدمات الدفع',
+    'psp.title': 'اقبل المدفوعات مثل الكبار',
+    'psp.subtitle': 'البطاقات وApple Pay وGoogle Pay وSEPA — تكامل واحد، تسوية فورية، أمان مصرفي.',
+    'psp.cta': 'جرّب صفحة الدفع',
+    'psp.funnel': 'مسار المدفوعات المباشر',
+    'footer.business': 'الأعمال',
+    'footer.developers': 'المطورون',
+    'footer.cards': 'البطاقات',
+    'footer.sandbox': 'البيئة التجريبية',
 
     'dash.home.totalBalance': 'إجمالي الرصيد',
     'dash.home.sendMoney': 'إرسال أموال',
@@ -1914,6 +2033,9 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'api.keys.production': 'إنتاج',
     'api.keys.copy': 'نسخ',
     'api.keys.masked': 'المفتاح مخفي للأمان',
+    'api.keys.roll': 'إعادة توليد',
+    'api.keys.revoke': 'إلغاء',
+    'api.keys.created': 'أُنشئ في',
 
     'api.docs.title': 'توثيق واجهة البرمجة',
     'api.docs.subtitle': 'ادمج البنية التحتية العالمية لتحريك الأموال من فانتا في تطبيقاتك.',
@@ -2099,6 +2221,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.success': 'تم الدفع بنجاح',
     'pay.pay': 'ادفع',
     'pay.poweredBy': 'مدعوم من VantaPay Rails · تكامل جاهز وفق PCI-DSS',
+    'pay.newCard': 'استخدام بطاقة جديدة',
+    'pay.saveCard': 'حفظ هذه البطاقة للمدفوعات القادمة',
 
     'ex.success': 'تم الصرف',
     'biz.payroll.run': 'تشغيل الرواتب',
@@ -2305,6 +2429,27 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.nav.settings': '设置',
     'dash.nav.support': '支持',
     'dash.nav.backToSite': '返回网站',
+    'dash.nav.cards': '银行卡',
+    'cards.title': '支付方式',
+    'cards.subtitle': '管理已保存的银行卡，即时充值',
+    'cards.add': '添加银行卡',
+    'cards.empty': '还没有已保存的银行卡。添加一张即可即时充值。',
+    'cards.default': '默认',
+    'cards.setDefault': '设为默认',
+    'cards.remove': '删除',
+    'cards.holder': '持卡人姓名',
+    'cards.expires': '有效期至',
+    'cards.added': '银行卡添加成功',
+    'cards.topUp': '充值',
+    'psp.badge': 'VantaPay · 支付服务提供商',
+    'psp.title': '像大公司一样收款',
+    'psp.subtitle': '银行卡、Apple Pay、Google Pay 和 SEPA — 一次集成，即时结算，银行级安全。',
+    'psp.cta': '体验收银台',
+    'psp.funnel': '实时支付漏斗',
+    'footer.business': '企业服务',
+    'footer.developers': '开发者',
+    'footer.cards': '银行卡',
+    'footer.sandbox': '沙盒',
 
     'dash.home.totalBalance': '总余额',
     'dash.home.sendMoney': '汇款',
@@ -2442,6 +2587,9 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'api.keys.production': '生产',
     'api.keys.copy': '复制',
     'api.keys.masked': '出于安全考虑，密钥已隐藏',
+    'api.keys.roll': '重新生成',
+    'api.keys.revoke': '撤销',
+    'api.keys.created': '创建于',
 
     'api.docs.title': 'API 文档',
     'api.docs.subtitle': '将 Vanta 全球资金流动基础设施集成到您的应用中。',
@@ -2622,6 +2770,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.success': '支付成功',
     'pay.pay': '支付',
     'pay.poweredBy': '由 VantaPay Rails 提供支持 · 符合 PCI-DSS 的集成',
+    'pay.newCard': '使用新银行卡',
+    'pay.saveCard': '保存此卡以便下次支付',
 
     'rec.form.title': '新收款人',
     'rec.form.name': '全名',

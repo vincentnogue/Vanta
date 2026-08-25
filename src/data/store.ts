@@ -1,29 +1,34 @@
 import { useSyncExternalStore } from 'react';
 import {
-  mockBalances, mockTransactions, mockRecipients, getFxRate,
-  type Balance, type Transaction, type Recipient,
+  mockBalances, mockTransactions, mockRecipients, mockPaymentMethods, getFxRate,
+  type Balance, type Transaction, type Recipient, type PaymentMethod,
 } from './mockData';
 
 export type StoreState = {
   balances: Balance[];
   transactions: Transaction[];
   recipients: Recipient[];
+  paymentMethods: PaymentMethod[];
 };
 
-const STORAGE_KEY = 'vanta-store-v1';
+const STORAGE_KEY = 'vanta-store-v2';
 
 function seed(): StoreState {
   return {
     balances: mockBalances.map((b) => ({ ...b })),
     transactions: mockTransactions.map((t) => ({ ...t })),
     recipients: mockRecipients.map((r) => ({ ...r })),
+    paymentMethods: mockPaymentMethods.map((p) => ({ ...p })),
   };
 }
 
 function load(): StoreState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as StoreState;
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<StoreState>;
+      return { ...seed(), ...parsed };
+    }
   } catch {
     // corrupted storage — fall back to seed
   }
@@ -81,6 +86,35 @@ export function createTransfer(tx: Transaction) {
 
 export function addRecipient(recipient: Recipient) {
   state = { ...state, recipients: [recipient, ...state.recipients] };
+  emit();
+}
+
+export function addPaymentMethod(method: PaymentMethod) {
+  const isFirst = state.paymentMethods.length === 0;
+  const withDefault = method.isDefault || isFirst
+    ? state.paymentMethods.map((p) => ({ ...p, isDefault: false }))
+    : state.paymentMethods;
+  state = {
+    ...state,
+    paymentMethods: [{ ...method, isDefault: method.isDefault || isFirst }, ...withDefault],
+  };
+  emit();
+}
+
+export function removePaymentMethod(id: string) {
+  const remaining = state.paymentMethods.filter((p) => p.id !== id);
+  if (remaining.length > 0 && !remaining.some((p) => p.isDefault)) {
+    remaining[0] = { ...remaining[0], isDefault: true };
+  }
+  state = { ...state, paymentMethods: remaining };
+  emit();
+}
+
+export function setDefaultPaymentMethod(id: string) {
+  state = {
+    ...state,
+    paymentMethods: state.paymentMethods.map((p) => ({ ...p, isDefault: p.id === id })),
+  };
   emit();
 }
 

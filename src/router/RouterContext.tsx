@@ -13,6 +13,7 @@ type Route =
   | 'recipients'
   | 'activity'
   | 'balances'
+  | 'cards'
   | 'exchange'
   | 'security'
   | 'settings'
@@ -36,7 +37,7 @@ type RouterContextValue = {
 const RouterContext = createContext<RouterContextValue | null>(null);
 
 const validRoutes: Route[] = [
-  'home', 'consumer', 'business', 'api', 'admin', 'superadmin', 'auth', 'kyc', 'send', 'recipients', 'activity', 'balances', 'exchange', 'security', 'settings', 'support',
+  'home', 'consumer', 'business', 'api', 'admin', 'superadmin', 'auth', 'kyc', 'send', 'recipients', 'activity', 'balances', 'cards', 'exchange', 'security', 'settings', 'support',
   'about', 'careers', 'press', 'contact', 'privacy', 'terms', 'licenses', 'compliance', 'status', 'blog',
 ];
 

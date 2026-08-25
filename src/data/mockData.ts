@@ -57,6 +57,16 @@ export type Balance = {
   flag: string;
 };
 
+export type PaymentMethod = {
+  id: string;
+  brand: 'VISA' | 'MASTERCARD' | 'AMEX';
+  last4: string;
+  expMonth: string;
+  expYear: string;
+  holder: string;
+  isDefault: boolean;
+};
+
 export const currencies: Currency[] = [
   { code: 'USD', name: 'US Dollar', symbol: '$', flag: '🇺🇸' },
   { code: 'EUR', name: 'Euro', symbol: '€', flag: '🇪🇺' },
@@ -334,6 +344,11 @@ export const mockTransactions: Transaction[] = [
   { id: 'VNT-20260820-000000037', recipientName: 'Sarah Johnson', recipientCountry: 'United Kingdom', recipientFlag: '🇬🇧', amount: 3000, currency: 'AED', payoutAmount: 648, payoutCurrency: 'GBP', status: 'completed', date: '2026-08-20T11:00:00', method: 'bank' },
   { id: 'VNT-20260819-000000036', recipientName: 'Aminata Diallo', recipientCountry: 'Senegal', recipientFlag: '🇸🇳', amount: 2000, currency: 'AED', payoutAmount: 328640, payoutCurrency: 'XOF', status: 'completed', date: '2026-08-19T08:20:00', method: 'mobile_money' },
   { id: 'VNT-20260818-000000035', recipientName: 'Jean-Paul Mbarga', recipientCountry: 'Cameroon', recipientFlag: '🇨🇲', amount: 1200, currency: 'AED', payoutAmount: 197184, payoutCurrency: 'XAF', status: 'failed', date: '2026-08-18T13:15:00', method: 'bank' },
+];
+
+export const mockPaymentMethods: PaymentMethod[] = [
+  { id: 'pm_1', brand: 'VISA', last4: '4242', expMonth: '12', expYear: '28', holder: 'Demo User', isDefault: true },
+  { id: 'pm_2', brand: 'MASTERCARD', last4: '8605', expMonth: '06', expYear: '27', holder: 'Demo User', isDefault: false },
 ];
 
 export const mockBalances: Balance[] = [

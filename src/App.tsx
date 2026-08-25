@@ -13,7 +13,7 @@ import { SuperAdminPage } from '@/pages/SuperAdminPage';
 import { InfoPage } from '@/pages/InfoPage';
 import type { InfoPageKey } from '@/data/infoContent';
 
-const CONSUMER_ROUTES = ['consumer', 'send', 'recipients', 'activity', 'balances', 'exchange', 'security', 'settings', 'support'];
+const CONSUMER_ROUTES = ['consumer', 'send', 'recipients', 'activity', 'balances', 'cards', 'exchange', 'security', 'settings', 'support'];
 const PROTECTED_ROUTES = [...CONSUMER_ROUTES, 'business', 'admin', 'superadmin'];
 const INFO_ROUTES: InfoPageKey[] = ['about', 'careers', 'press', 'contact', 'privacy', 'terms', 'licenses', 'compliance', 'status', 'blog'];
 

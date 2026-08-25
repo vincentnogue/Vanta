@@ -7,11 +7,73 @@ import {
   Copy, Check, Terminal, Zap, Shield, Globe, ArrowLeftRight, TrendingUp,
 } from 'lucide-react';
 
+type ApiKey = { id: string; env: 'sandbox' | 'production'; key: string; createdAt: string };
+
+const KEYS_STORAGE = 'vanta-api-keys-v1';
+
+function generateKey(env: 'sandbox' | 'production'): string {
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `${env === 'production' ? 'vnt_live' : 'vnt_test'}_${hex}`;
+}
+
+function seedKeys(): ApiKey[] {
+  const today = new Date().toISOString().slice(0, 10);
+  return [
+    { id: 'key_sandbox', env: 'sandbox', key: generateKey('sandbox'), createdAt: today },
+    { id: 'key_production', env: 'production', key: generateKey('production'), createdAt: today },
+  ];
+}
+
+function loadKeys(): ApiKey[] {
+  try {
+    const raw = localStorage.getItem(KEYS_STORAGE);
+    if (raw) {
+      const parsed = JSON.parse(raw) as ApiKey[];
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // corrupted storage — reseed
+  }
+  return seedKeys();
+}
+
 export function ApiPortal() {
   const { t, lang } = useI18n();
   const [activeTab, setActiveTab] = useState<'overview' | 'keys' | 'docs' | 'webhooks' | 'sandbox' | 'logs' | 'usage'>('overview');
   const [copied, setCopied] = useState(false);
   const [codeLang, setCodeLang] = useState<'curl' | 'javascript' | 'python'>('curl');
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>(loadKeys);
+
+  const persistKeys = (keys: ApiKey[]) => {
+    setApiKeys(keys);
+    try {
+      localStorage.setItem(KEYS_STORAGE, JSON.stringify(keys));
+    } catch {
+      // storage unavailable — keys still work in memory
+    }
+  };
+
+  const createKey = () => {
+    const env = apiKeys.some((k) => k.env === 'sandbox') && !apiKeys.some((k) => k.env === 'production')
+      ? 'production'
+      : 'sandbox';
+    persistKeys([
+      ...apiKeys,
+      { id: `key_${Date.now()}`, env, key: generateKey(env), createdAt: new Date().toISOString().slice(0, 10) },
+    ]);
+  };
+
+  const rollKey = (id: string) => {
+    persistKeys(apiKeys.map((k) => (k.id === id
+      ? { ...k, key: generateKey(k.env), createdAt: new Date().toISOString().slice(0, 10) }
+      : k)));
+  };
+
+  const revokeKey = (id: string) => {
+    persistKeys(apiKeys.filter((k) => k.id !== id));
+  };
 
   const navItems = [
     { route: 'api' as Route, label: t('api.nav.overview'), icon: Code2 },
@@ -200,16 +262,13 @@ print(transfer.id)  # VNT-20260823-000000001`,
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-bold text-vanta-900">{t('api.keys.title')}</h3>
-              <button className="btn-primary text-sm">
+              <button onClick={createKey} className="btn-primary text-sm">
                 + {t('api.keys.create')}
               </button>
             </div>
 
-            {[
-              { env: 'sandbox', key: 'vnt_test_8f2a9b3c4d5e6f7a8b9c', label: t('api.keys.sandbox') },
-              { env: 'production', key: 'vnt_live_1a2b3c4d5e6f7a8b9c0d', label: t('api.keys.production') },
-            ].map((apiKey) => (
-              <div key={apiKey.env} className="card p-6">
+            {apiKeys.map((apiKey) => (
+              <div key={apiKey.id} className="card p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -218,9 +277,11 @@ print(transfer.id)  # VNT-20260823-000000001`,
                       <Key className={`w-5 h-5 ${apiKey.env === 'production' ? 'text-danger-600' : 'text-accent-600'}`} />
                     </div>
                     <div>
-                      <div className="font-semibold text-vanta-900">{apiKey.label}</div>
+                      <div className="font-semibold text-vanta-900">
+                        {apiKey.env === 'production' ? t('api.keys.production') : t('api.keys.sandbox')}
+                      </div>
                       <div className="text-xs text-ink-400">
-                        {apiKey.env === 'production' ? 'Live mode' : 'Test mode'}
+                        {apiKey.env === 'production' ? 'Live mode' : 'Test mode'} · {t('api.keys.created')} {apiKey.createdAt}
                       </div>
                     </div>
                   </div>
@@ -235,11 +296,28 @@ print(transfer.id)  # VNT-20260823-000000001`,
                   <button
                     onClick={() => copyToClipboard(apiKey.key)}
                     className="btn-outline px-3 py-3"
+                    aria-label="Copy"
                   >
                     {copied ? <Check className="w-4 h-4 text-success-600" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-ink-400 mt-3">{t('api.keys.masked')}</p>
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-ink-400">{t('api.keys.masked')}</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => rollKey(apiKey.id)}
+                      className="text-xs font-semibold text-vanta-700 hover:text-vanta-800"
+                    >
+                      {t('api.keys.roll')}
+                    </button>
+                    <button
+                      onClick={() => revokeKey(apiKey.id)}
+                      className="text-xs font-semibold text-danger-600 hover:text-danger-700"
+                    >
+                      {t('api.keys.revoke')}
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

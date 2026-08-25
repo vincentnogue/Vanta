@@ -16,6 +16,7 @@ import { useStore, createTransfer, addRecipient, exchangeMoney, nextTxId } from 
 import { useAuth } from '@/data/auth';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PspCheckout } from '@/components/PspCheckout';
+import { CardsPage } from './CardsPage';
 import { X, Monitor, Smartphone as PhoneIcon, Globe as GlobeIcon, MessageSquare, Plus } from 'lucide-react';
 
 const iconMap: Record<string, typeof Home> = {
@@ -48,6 +49,7 @@ export function ConsumerDashboard() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -57,6 +59,7 @@ export function ConsumerDashboard() {
   if (route === 'recipients') return <Recipients />;
   if (route === 'activity') return <ActivityPage />;
   if (route === 'balances') return <Balances />;
+  if (route === 'cards') return <CardsPage />;
   if (route === 'exchange') return <Exchange />;
   if (route === 'security') return <SecurityPage />;
   if (route === 'settings') return <SettingsPage />;
@@ -218,6 +221,7 @@ function SendMoney() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -589,6 +593,7 @@ function Recipients() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -700,6 +705,7 @@ function ActivityPage() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -804,6 +810,7 @@ function Balances() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -888,6 +895,7 @@ function Exchange() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -981,6 +989,7 @@ function SecurityPage() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -1058,14 +1067,38 @@ function SecurityPage() {
 }
 
 // --- Settings Page ---
+const PROFILE_STORAGE = 'vanta-profile-v1';
+
+type ProfilePrefs = {
+  name: string;
+  phone: string;
+  notifs: { email: boolean; sms: boolean; push: boolean; marketing: boolean };
+};
+
+function loadProfile(defaultName: string): ProfilePrefs {
+  const fallback: ProfilePrefs = {
+    name: defaultName,
+    phone: '+971 50 123 4567',
+    notifs: { email: true, sms: false, push: true, marketing: false },
+  };
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE);
+    if (raw) return { ...fallback, ...(JSON.parse(raw) as Partial<ProfilePrefs>) };
+  } catch {
+    // corrupted storage — fall back to defaults
+  }
+  return fallback;
+}
+
 function SettingsPage() {
   const { t, lang, setLang } = useI18n();
   const { user } = useAuth();
   const kycVerified = user?.kycStatus === 'verified';
-  const [name, setName] = useState('Vincent Nogue');
-  const [phone, setPhone] = useState('+971 50 123 4567');
+  const [profile] = useState(() => loadProfile(user?.name ?? 'Vincent Nogue'));
+  const [name, setName] = useState(profile.name);
+  const [phone, setPhone] = useState(profile.phone);
   const [saved, setSaved] = useState(false);
-  const [notifs, setNotifs] = useState({ email: true, sms: false, push: true, marketing: false });
+  const [notifs, setNotifs] = useState(profile.notifs);
 
   const navItems = [
     { route: 'consumer' as Route, label: t('dash.nav.home'), icon: Home },
@@ -1073,6 +1106,7 @@ function SettingsPage() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
@@ -1087,6 +1121,11 @@ function SettingsPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      localStorage.setItem(PROFILE_STORAGE, JSON.stringify({ name, phone, notifs }));
+    } catch {
+      // storage unavailable — keep in-memory state
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -1179,6 +1218,7 @@ function SupportPage() {
     { route: 'recipients' as Route, label: t('dash.nav.recipients'), icon: Users },
     { route: 'activity' as Route, label: t('dash.nav.activity'), icon: ActivityIcon },
     { route: 'balances' as Route, label: t('dash.nav.balances'), icon: Wallet },
+    { route: 'cards' as Route, label: t('dash.nav.cards'), icon: CreditCard },
     { route: 'exchange' as Route, label: t('dash.nav.exchange'), icon: Repeat },
     { route: 'security' as Route, label: t('dash.nav.security'), icon: Shield },
     { route: 'settings' as Route, label: t('dash.nav.settings'), icon: Settings },
