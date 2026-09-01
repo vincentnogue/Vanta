@@ -123,7 +123,7 @@ export function LandingPage() {
     <div className="min-h-screen bg-white overflow-x-hidden">
       <Navbar />
 
-      {/* Hero — Wise-style split: message left, converter right */}
+      {/* Hero — centered headline + CTAs + product mockup below (PayUnit-style) */}
       <section className="relative overflow-hidden pt-32 pb-16 lg:pt-40 lg:pb-24">
         <div
           className="absolute inset-0 z-0 bg-grid-light"
@@ -137,57 +137,65 @@ export function LandingPage() {
           }}
         />
 
-        <div className="absolute top-16 start-[15%] w-72 h-72 rounded-full bg-vanta-100/50 blur-[120px] animate-breathe pointer-events-none" />
-        <div className="absolute top-48 end-[12%] w-80 h-80 rounded-full bg-accent-100/40 blur-[130px] animate-breathe pointer-events-none" style={{ animationDelay: '2.5s' }} />
+        <div className="absolute top-10 start-[12%] w-72 h-72 rounded-full bg-vanta-100/50 blur-[120px] animate-breathe pointer-events-none" />
+        <div className="absolute top-16 end-[10%] w-80 h-80 rounded-full bg-accent-100/40 blur-[130px] animate-breathe pointer-events-none" style={{ animationDelay: '2.5s' }} />
 
-        <div className="section-padding max-w-7xl mx-auto relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: message */}
-            <div className="text-center lg:text-start">
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.6rem] font-semibold text-black tracking-tight text-balance leading-[1.08] animate-fade-up">
-                {t('hero.title')}{' '}
-                <span className="bg-gradient-to-r from-vanta-800 via-vanta-500 to-accent-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
-                  {t('hero.titleHighlight')}
+        <div className="section-padding max-w-5xl mx-auto relative z-10 text-center">
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.75rem] font-semibold text-black tracking-tight text-balance leading-[1.1] animate-fade-up">
+            {t('hero.title')}{' '}
+            <span className="text-glow-scroll animate-text-glow-scroll inline-block">
+              {t('hero.titleHighlight')}
+            </span>
+          </h1>
+
+          <p className="mt-6 text-base sm:text-lg text-ink-500 max-w-2xl mx-auto leading-relaxed animate-fade-up animate-delay-100">
+            {t('hero.subtitle')}
+          </p>
+
+          <div className="mt-9 flex flex-col sm:flex-row items-center gap-3 justify-center animate-fade-up animate-delay-200">
+            <button onClick={() => navigate('auth')} className="btn-primary h-12 pl-7 pr-2 text-base w-full sm:w-auto">
+              {t('hero.cta')}
+              <span className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            </button>
+            <button
+              onClick={() => navigate('api')}
+              className="inline-flex items-center gap-3 h-12 pl-7 pr-2 rounded-lg bg-white border border-ink-200 text-black font-medium text-base w-full sm:w-auto justify-center transition-all duration-300 hover:border-ink-300 hover:shadow-md"
+            >
+              {t('hero.ctaSecondary')}
+              <span className="w-8 h-8 rounded-full bg-ink-900/5 flex items-center justify-center">
+                <ArrowRight className="w-4 h-4" />
+              </span>
+            </button>
+          </div>
+
+          <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 animate-fade-up animate-delay-300">
+            {trustFeatures.map((f) => (
+              <li key={f.key} className="flex items-center gap-2 text-[13px] font-medium text-ink-600">
+                <span className="w-5 h-5 rounded-full bg-vanta-100 flex items-center justify-center shrink-0">
+                  <f.icon className="w-3 h-3 text-vanta-700" />
                 </span>
-              </h1>
+                {t(f.key)}
+              </li>
+            ))}
+          </ul>
 
-              <p className="mt-6 text-base sm:text-lg text-ink-500 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fade-up animate-delay-100">
-                {t('hero.subtitle')}
-              </p>
-
-              <ul className="mt-8 space-y-3.5 inline-block text-start animate-fade-up animate-delay-200">
-                {trustFeatures.map((f) => (
-                  <li key={f.key} className="flex items-center gap-3 text-[15px] font-medium text-ink-700">
-                    <span className="w-6 h-6 rounded-full bg-vanta-100 flex items-center justify-center shrink-0">
-                      <f.icon className="w-3.5 h-3.5 text-vanta-700" />
-                    </span>
-                    {t(f.key)}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-9 flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start animate-fade-up animate-delay-300">
-                <button onClick={() => navigate('auth')} className="btn-primary h-12 px-8 text-base w-full sm:w-auto">
-                  {t('hero.cta')}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="mt-7 flex items-center gap-2 justify-center lg:justify-start text-xs text-ink-400 animate-fade-up animate-delay-500">
-                <BelgianFlag />
-                <span>{t('hero.trustLine')}</span>
-              </div>
-            </div>
-
-            {/* Right: live converter */}
-            <div className="max-w-md w-full mx-auto lg:ms-auto animate-fade-up animate-delay-300">
-              <Converter />
-            </div>
+          <div className="mt-5 flex items-center gap-2 justify-center text-xs text-ink-400 animate-fade-up animate-delay-500">
+            <BelgianFlag />
+            <span>{t('hero.trustLine')}</span>
           </div>
         </div>
 
+        {/* Product mockup, straight under the fold like the reference design */}
+        <div className="section-padding max-w-6xl mx-auto relative z-10 mt-16 lg:mt-20">
+          <Reveal delay={150}>
+            <HeroMockup />
+          </Reveal>
+        </div>
+
         <div
-          className="absolute inset-x-0 -bottom-8 flex items-center justify-center pointer-events-none select-none"
+          className="absolute inset-x-0 bottom-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
           style={{ transform: `translateY(${scrollY * 0.2}px)` }}
         >
           <span className="text-[20vw] font-bold leading-none text-black/[0.04]">VANTA</span>
@@ -200,7 +208,7 @@ export function LandingPage() {
       {/* Flags river — 194 countries in motion */}
       <FlagRiver />
 
-      {/* Product showcase */}
+      {/* Live rate calculator */}
       <section className="py-16 sm:py-24 bg-white">
         <div className="section-padding max-w-6xl mx-auto">
           <Reveal className="text-center max-w-2xl mx-auto">
@@ -213,10 +221,15 @@ export function LandingPage() {
             </h2>
             <p className="mt-4 text-lg text-ink-500">{t('showcase.subtitle')}</p>
           </Reveal>
-          <Reveal delay={150} className="mt-12">
-            <div className="transition-transform duration-500 hover:scale-[1.01]">
-              <HeroMockup />
-            </div>
+          <Reveal delay={150} className="mt-12 max-w-md mx-auto">
+            <Converter />
+            <button
+              onClick={() => navigate('auth')}
+              className="mt-6 mx-auto flex items-center gap-2 text-vanta-700 font-semibold text-sm hover:gap-3 transition-all"
+            >
+              {t('showcase.cta')}
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </Reveal>
         </div>
       </section>

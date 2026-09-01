@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        sans: ['Poppins', 'system-ui', 'sans-serif'],
+        display: ['Poppins', 'system-ui', 'sans-serif'],
         mono: ['Geist Mono', 'monospace'],
       },
       colors: {
@@ -81,6 +81,7 @@ export default {
         'float-slower': 'float 11s ease-in-out infinite',
         'spin-slow': 'spin 14s linear infinite',
         'breathe': 'breathe 5s ease-in-out infinite',
+        'text-glow-scroll': 'textGlowScroll 4s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -126,6 +127,10 @@ export default {
         breathe: {
           '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
           '50%': { opacity: '1', transform: 'scale(1.06)' },
+        },
+        textGlowScroll: {
+          '0%': { 'background-position': '0% 50%' },
+          '100%': { 'background-position': '200% 50%' },
         },
       },
       backgroundImage: {

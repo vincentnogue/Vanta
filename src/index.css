@@ -105,6 +105,26 @@
     background-size: 200% 100%;
   }
 
+  /* Traveling glow effect for hero H1 highlight — a band of light that
+     scrolls continuously across the gradient text (teal -> amber -> teal) */
+  .text-glow-scroll {
+    background-image: linear-gradient(
+      100deg,
+      #0f766e 0%,
+      #14b8a6 18%,
+      #fbbf24 32%,
+      #fde68a 40%,
+      #fbbf24 48%,
+      #2dd4bf 62%,
+      #0f766e 80%,
+      #0f766e 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
   .spotlight {
     position: relative;
     overflow: hidden;
