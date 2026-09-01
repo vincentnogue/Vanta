@@ -19,7 +19,16 @@ const INFO_ROUTES: InfoPageKey[] = ['about', 'careers', 'press', 'contact', 'pri
 
 function AppContent() {
   const { route } = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // While the Supabase session is resolving, avoid flashing the sign-in page.
+  if (loading && PROTECTED_ROUTES.includes(route)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-vanta-200 border-t-vanta-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   // Auth-required platform
   if (PROTECTED_ROUTES.includes(route) && !user) return <AuthPage />;

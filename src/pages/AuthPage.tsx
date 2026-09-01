@@ -3,8 +3,8 @@ import { useI18n } from '@/i18n/I18nContext';
 import { useRouter } from '@/router/RouterContext';
 import { Logo } from '@/components/Logo';
 import { LanguageToggle } from '@/components/LanguageToggle';
-import { signIn, isSuperAdminEmail } from '@/data/auth';
-import { ArrowLeft, Mail, Lock, ArrowRight, Check, User, Building2 } from 'lucide-react';
+import { signIn, signUp, isSuperAdminEmail } from '@/data/auth';
+import { ArrowLeft, Mail, Lock, ArrowRight, Check, User, Building2, AlertCircle } from 'lucide-react';
 
 function initialAccountType(): 'personal' | 'business' {
   try {
@@ -23,12 +23,18 @@ export function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    setTimeout(() => {
-      signIn(email, mode === 'signup' ? name : undefined);
+    try {
+      if (mode === 'signup') {
+        await signUp(email, password, name, accountType);
+      } else {
+        await signIn(email, password);
+      }
       navigate(
         isSuperAdminEmail(email)
           ? 'superadmin'
@@ -36,7 +42,11 @@ export function AuthPage() {
             ? 'business'
             : 'consumer',
       );
-    }, 900);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -184,6 +194,13 @@ export function AuthPage() {
                   />
                 </div>
               </div>
+
+              {error && (
+                <div className="flex items-start gap-2 rounded-lg bg-danger-50 border border-danger-500/20 px-3.5 py-2.5 text-sm text-danger-700">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               {mode === 'signin' && (
                 <div className="flex justify-end">

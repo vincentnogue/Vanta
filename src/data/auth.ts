@@ -1,55 +1,31 @@
 import { useSyncExternalStore } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export type KycStatus = 'unverified' | 'pending' | 'verified';
 export type UserRole = 'customer' | 'superadmin';
+export type AccountType = 'personal' | 'business';
 
 export type User = {
+  id: string;
   name: string;
   email: string;
   role: UserRole;
   kycStatus: KycStatus;
+  accountType: AccountType;
 };
 
 type AuthState = {
   user: User | null;
+  loading: boolean;
   superAdminEmails: string[];
 };
 
-const STORAGE_KEY = 'vanta-auth-v1';
-
 export const DEFAULT_SUPER_ADMINS = ['webdxb1@gmail.com', 'vincentnogue2@gmail.com'];
 
-function load(): AuthState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as AuthState;
-      if (parsed && Array.isArray(parsed.superAdminEmails)) {
-        return {
-          user: parsed.user ?? null,
-          superAdminEmails: Array.from(new Set([...DEFAULT_SUPER_ADMINS, ...parsed.superAdminEmails])),
-        };
-      }
-    }
-  } catch {
-    // corrupted storage — fall back to defaults
-  }
-  return { user: null, superAdminEmails: [...DEFAULT_SUPER_ADMINS] };
-}
-
-let state: AuthState = load();
+let state: AuthState = { user: null, loading: true, superAdminEmails: [...DEFAULT_SUPER_ADMINS] };
 const listeners = new Set<() => void>();
 
-function persist() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // storage unavailable — state still works in memory
-  }
-}
-
 function emit() {
-  persist();
   listeners.forEach((l) => l());
 }
 
@@ -66,51 +42,104 @@ export function useAuth(): AuthState {
   return useSyncExternalStore(subscribe, getSnapshot);
 }
 
-export function isSuperAdminEmail(email: string): boolean {
-  return state.superAdminEmails.includes(email.trim().toLowerCase());
-}
-
-export function signIn(email: string, name?: string) {
-  const normalized = email.trim().toLowerCase();
-  state = {
-    ...state,
-    user: {
-      name: name?.trim() || normalized.split('@')[0],
-      email: normalized,
-      role: isSuperAdminEmail(normalized) ? 'superadmin' : 'customer',
-      kycStatus: state.user?.email === normalized ? state.user.kycStatus : 'unverified',
-    },
+async function loadProfile(userId: string, fallbackEmail: string): Promise<User> {
+  const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+  if (!data) {
+    return { id: userId, name: fallbackEmail.split('@')[0], email: fallbackEmail, role: 'customer', kycStatus: 'unverified', accountType: 'personal' };
+  }
+  return {
+    id: data.id,
+    name: data.full_name || fallbackEmail.split('@')[0],
+    email: data.email,
+    role: data.role as UserRole,
+    kycStatus: data.kyc_status as KycStatus,
+    accountType: data.account_type as AccountType,
   };
-  emit();
 }
 
-export function signOut() {
-  state = { ...state, user: null };
-  emit();
+async function refreshSuperAdmins() {
+  const { data } = await supabase.from('superadmins').select('email');
+  if (data) {
+    state = { ...state, superAdminEmails: Array.from(new Set([...DEFAULT_SUPER_ADMINS, ...data.map((d) => d.email as string)])) };
+    emit();
+  }
 }
 
-export function submitKyc() {
+async function applySession(userId: string | undefined, email: string | undefined) {
+  if (userId) {
+    const user = await loadProfile(userId, email ?? '');
+    state = { ...state, user, loading: false };
+    emit();
+    if (user.role === 'superadmin') refreshSuperAdmins();
+  } else {
+    state = { ...state, user: null, loading: false };
+    emit();
+  }
+}
+
+// Resolve the initial session once on load.
+supabase.auth.getSession().then(({ data: { session } }) => {
+  applySession(session?.user?.id, session?.user?.email);
+});
+
+// Keep in sync with sign-in / sign-out / token refresh, including from other tabs.
+supabase.auth.onAuthStateChange((_event, session) => {
+  applySession(session?.user?.id, session?.user?.email);
+});
+
+export async function signUp(email: string, password: string, fullName: string, accountType: AccountType) {
+  const { error } = await supabase.auth.signUp({
+    email: email.trim().toLowerCase(),
+    password,
+    options: { data: { full_name: fullName.trim(), account_type: accountType } },
+  });
+  if (error) throw error;
+}
+
+export async function signIn(email: string, password: string) {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password,
+  });
+  if (error) throw error;
+}
+
+export async function signOut() {
+  await supabase.auth.signOut();
+}
+
+export async function submitKyc() {
   if (!state.user) return;
+  const { error } = await supabase.from('profiles').update({ kyc_status: 'pending' }).eq('id', state.user.id);
+  if (error) return;
   state = { ...state, user: { ...state.user, kycStatus: 'pending' } };
   emit();
 }
 
-export function approveKyc() {
+export async function approveKyc() {
   if (!state.user) return;
+  const { error } = await supabase.from('profiles').update({ kyc_status: 'verified' }).eq('id', state.user.id);
+  if (error) return;
   state = { ...state, user: { ...state.user, kycStatus: 'verified' } };
   emit();
 }
 
-export function addSuperAdmin(email: string) {
-  const normalized = email.trim().toLowerCase();
-  if (!normalized || state.superAdminEmails.includes(normalized)) return;
-  state = { ...state, superAdminEmails: [...state.superAdminEmails, normalized] };
-  emit();
+export function isSuperAdminEmail(email: string): boolean {
+  return state.superAdminEmails.includes(email.trim().toLowerCase());
 }
 
-export function removeSuperAdmin(email: string) {
+export async function addSuperAdmin(email: string) {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized || state.superAdminEmails.includes(normalized)) return;
+  await supabase.from('superadmins').insert({ email: normalized });
+  await supabase.from('profiles').update({ role: 'superadmin' }).eq('email', normalized);
+  await refreshSuperAdmins();
+}
+
+export async function removeSuperAdmin(email: string) {
   const normalized = email.trim().toLowerCase();
   if (DEFAULT_SUPER_ADMINS.includes(normalized)) return;
-  state = { ...state, superAdminEmails: state.superAdminEmails.filter((e) => e !== normalized) };
-  emit();
+  await supabase.from('superadmins').delete().eq('email', normalized);
+  await supabase.from('profiles').update({ role: 'customer' }).eq('email', normalized);
+  await refreshSuperAdmins();
 }
