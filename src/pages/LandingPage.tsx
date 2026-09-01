@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n/I18nContext';
 import { useRouter } from '@/router/RouterContext';
 import {
-  ArrowRight, Send, Building2, Code2, Shield, ShieldCheck, Eye, FileLock2,
+  ArrowRight, Send, Building2, Code2, ShieldCheck,
   Globe2, Quote, Route as RouteIcon, CheckCircle2, Terminal,
   CreditCard, Smartphone, Landmark, Lock, Repeat,
+  ShoppingCart, Link2, ArrowDownToLine, ArrowUpFromLine, Receipt,
 } from 'lucide-react';
 import { countries, type Region } from '@/data/mockData';
 import { Navbar } from '@/components/Navbar';
@@ -25,10 +26,10 @@ const trustFeatures = [
 ];
 
 const corridors = [
-  { from: '🇦🇪 UAE', to: '🇨🇲 Cameroon', toFr: '🇨🇲 Cameroun', fee: '1.2%', speed: 'Instant' },
-  { from: '🇦🇪 UAE', to: '🇳🇬 Nigeria', toFr: '🇳🇬 Nigéria', fee: '0.9%', speed: 'Instant' },
+  { from: '🇪🇺 Europe', to: '🇸🇳 Senegal', toFr: '🇸🇳 Sénégal', fee: '1.1%', speed: 'Instant' },
+  { from: '🇫🇷 France', to: '🇨🇲 Cameroon', toFr: '🇨🇲 Cameroun', fee: '1.1%', speed: 'Instant' },
+  { from: '🇧🇪 Belgium', to: '🇳🇬 Nigeria', toFr: '🇳🇬 Nigéria', fee: '0.9%', speed: '~30 s' },
   { from: '🇦🇪 UAE', to: '🇰🇪 Kenya', toFr: '🇰🇪 Kenya', fee: '1.0%', speed: '~30 s' },
-  { from: '🇫🇷 France', to: '🇸🇳 Senegal', toFr: '🇸🇳 Sénégal', fee: '1.1%', speed: 'Instant' },
   { from: '🇺🇸 USA', to: '🇳🇬 Nigeria', toFr: '🇳🇬 Nigéria', fee: '0.8%', speed: '~3 min' },
   { from: '🇬🇧 UK', to: '🇬🇭 Ghana', toFr: '🇬🇭 Ghana', fee: '1.0%', speed: 'Instant' },
 ];
@@ -100,17 +101,19 @@ export function LandingPage() {
     },
   ];
 
+  const suiteProducts = [
+    { icon: ShoppingCart, title: t('suite.checkouts.title'), desc: t('suite.checkouts.desc') },
+    { icon: Smartphone, title: t('suite.pos.title'), desc: t('suite.pos.desc') },
+    { icon: Link2, title: t('suite.link.title'), desc: t('suite.link.desc') },
+    { icon: ArrowDownToLine, title: t('suite.collect.title'), desc: t('suite.collect.desc') },
+    { icon: ArrowUpFromLine, title: t('suite.disburse.title'), desc: t('suite.disburse.desc') },
+    { icon: Receipt, title: t('suite.invoice.title'), desc: t('suite.invoice.desc') },
+  ];
+
   const steps = [
     { icon: Quote, title: t('steps.1.title'), desc: t('steps.1.desc') },
     { icon: RouteIcon, title: t('steps.2.title'), desc: t('steps.2.desc') },
     { icon: CheckCircle2, title: t('steps.3.title'), desc: t('steps.3.desc') },
-  ];
-
-  const securityFeatures = [
-    { icon: ShieldCheck, title: t('security.encryption'), desc: t('security.encryptionDesc') },
-    { icon: FileLock2, title: t('security.compliance'), desc: t('security.complianceDesc') },
-    { icon: Eye, title: t('security.monitoring'), desc: t('security.monitoringDesc') },
-    { icon: Shield, title: t('security.audit'), desc: t('security.auditDesc') },
   ];
 
   const stats = [
@@ -278,6 +281,52 @@ export function LandingPage() {
                   <ArrowRight className="w-4 h-4" />
                 </div>
               </button>
+            ))}
+          </div>
+        </div>
+        </Reveal>
+      </section>
+
+      {/* Payment product suite */}
+      <section className="py-16 sm:py-20 bg-ink-50/60 border-y border-ink-100">
+        <Reveal>
+        <div className="section-padding max-w-6xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-black tracking-tight">
+              {t('suite.title').split(' ').map((word, i, arr) =>
+                i >= arr.length - 2 ? (
+                  <span key={i} className="bg-gradient-to-r from-vanta-700 via-vanta-500 to-accent-400 bg-clip-text text-transparent">
+                    {word}{i < arr.length - 1 ? ' ' : ''}
+                  </span>
+                ) : (
+                  <span key={i}>{word} </span>
+                ),
+              )}
+            </h2>
+            <p className="mt-4 text-lg text-ink-500">{t('suite.subtitle')}</p>
+          </div>
+
+          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {suiteProducts.map((p, i) => (
+              <div
+                key={i}
+                onMouseMove={handleSpotlight}
+                onMouseLeave={handleTiltLeave}
+                className="relative overflow-hidden card spotlight p-6 will-change-transform transition-transform duration-200"
+              >
+                <div className="absolute -right-4 -top-4 w-24 h-24 text-ink-100 opacity-60 pointer-events-none">
+                  <p.icon className="w-full h-full" strokeWidth={1} />
+                </div>
+                <div className="relative">
+                  <p.icon className="w-6 h-6 text-vanta-600 mb-4" />
+                  <h3 className="font-display text-lg font-bold text-black mb-2">{p.title}</h3>
+                  <p className="text-sm text-ink-500 leading-relaxed max-w-xs">{p.desc}</p>
+                  <div className="mt-4 inline-flex items-center gap-1.5 text-vanta-700 font-semibold text-sm hover:gap-2.5 transition-all cursor-pointer">
+                    {t('products.learnMore')}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -573,45 +622,60 @@ export function LandingPage() {
       </section>
 
       {/* Security */}
-      <section className="py-16 sm:py-20 bg-vanta-950 relative overflow-hidden">
+      <section className="py-16 sm:py-20 bg-ink-50/60">
         <Reveal>
-        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-vanta-500/10 rounded-full blur-[150px]" />
-
-        <div className="section-padding max-w-6xl mx-auto relative">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-vanta-500/10 border border-vanta-500/20 text-vanta-300 text-sm font-medium mb-4">
-              <Shield className="w-4 h-4" />
-              {t('nav.security')}
-            </div>
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight">
-              {t('security.title')}
-            </h2>
-            <p className="mt-4 text-lg text-ink-400">{t('security.subtitle')}</p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {securityFeatures.map((feature, i) => (
-              <div
-                key={i}
-                className="glass-dark rounded-2xl p-6 hover:border-vanta-500/30 transition-all duration-300"
-              >
-                <div className="w-12 h-12 rounded-xl bg-vanta-500/15 flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-vanta-300" />
-                </div>
-                <h3 className="font-display text-lg font-bold text-white mb-2">{feature.title}</h3>
-                <p className="text-sm text-ink-400 leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 glass-dark rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-            <BelgianFlag className="w-10 h-7" />
+        <div className="section-padding max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: message */}
             <div>
-              <div className="text-white font-semibold text-sm">{t('security.compliance')}</div>
-              <div className="text-ink-400 text-xs mt-1">{t('footer.license')}</div>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-vanta-50 border border-vanta-100 text-vanta-700 text-sm font-medium">
+                <ShieldCheck className="w-4 h-4" />
+                {t('security.badge')}
+              </div>
+              <h2 className="mt-5 font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-black tracking-tight">
+                {t('security.title').split(' ').slice(0, -1).join(' ')}{' '}
+                <span className="bg-gradient-to-r from-vanta-700 via-accent-500 to-vanta-500 bg-clip-text text-transparent">
+                  {t('security.title').split(' ').slice(-1)}
+                </span>
+              </h2>
+              <p className="mt-4 text-lg text-ink-500 max-w-md">{t('security.subtitle')}</p>
+
+              <ul className="mt-8 space-y-6">
+                {[
+                  { title: t('security.audit'), desc: t('security.auditDesc') },
+                  { title: t('security.encryption'), desc: t('security.encryptionDesc') },
+                  { title: t('security.zeroStorage'), desc: t('security.zeroStorageDesc') },
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <span className="mt-0.5 w-6 h-6 rounded-full bg-vanta-50 border border-vanta-100 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-vanta-600" />
+                    </span>
+                    <div>
+                      <div className="font-display font-bold text-black">{item.title}</div>
+                      <p className="mt-0.5 text-sm text-ink-500 leading-relaxed">{item.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ShieldCheck className="w-8 h-8 text-vanta-400 sm:ms-auto" />
+
+            {/* Right: PCI DSS badge card */}
+            <div className="flex flex-col items-center">
+              <div className="w-full max-w-xs card p-8 flex items-center justify-center">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="w-14 h-14 text-vanta-600" strokeWidth={1.5} />
+                  <div className="text-left">
+                    <div className="font-display font-black text-xl text-vanta-900 leading-tight">PCI DSS</div>
+                    <div className="text-xs font-semibold text-vanta-600 tracking-wide">COMPLIANT</div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 text-center">
+                <div className="font-display text-2xl font-bold text-black">{t('security.pciLevel')}</div>
+                <div className="text-vanta-600 font-semibold text-sm mt-1">PCI DSS</div>
+                <div className="text-ink-400 text-sm mt-1">{t('security.pciAnnual')}</div>
+              </div>
+            </div>
           </div>
         </div>
         </Reveal>

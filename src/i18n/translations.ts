@@ -85,7 +85,15 @@ export type TranslationKey =
   | 'kyc.doc.passport' | 'kyc.doc.id_card' | 'kyc.doc.driving_license' | 'kyc.docNumber' | 'kyc.upload'
   | 'kyc.selfie' | 'kyc.selfieDone' | 'kyc.submit' | 'kyc.aml' | 'kyc.pending.title' | 'kyc.pending.subtitle' | 'kyc.pending.simulate'
   | 'sa.admins.title' | 'sa.admins.add' | 'sa.admins.added' | 'sa.staff.add' | 'sa.staff.suspend' | 'sa.staff.remove' | 'sa.staff.suspended' | 'sa.staff.name' | 'sa.staff.email' | 'sa.admins.protected'
-  | 'ex.success' | 'biz.payroll.run' | 'biz.payroll.paid' | 'biz.reports.monthly';
+  | 'ex.success' | 'biz.payroll.run' | 'biz.payroll.paid' | 'biz.reports.monthly'
+  | 'security.badge' | 'security.zeroStorage' | 'security.zeroStorageDesc' | 'security.pciLevel' | 'security.pciAnnual'
+  | 'suite.title' | 'suite.subtitle'
+  | 'suite.checkouts.title' | 'suite.checkouts.desc'
+  | 'suite.pos.title' | 'suite.pos.desc'
+  | 'suite.link.title' | 'suite.link.desc'
+  | 'suite.collect.title' | 'suite.collect.desc'
+  | 'suite.disburse.title' | 'suite.disburse.desc'
+  | 'suite.invoice.title' | 'suite.invoice.desc';
 export const translations: Record<Language, Partial<Record<TranslationKey, string>>> = {
   en: {
     'nav.home': 'Home',
@@ -554,6 +562,25 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'biz.payroll.run': 'Run payroll',
     'biz.payroll.paid': 'Paid',
     'biz.reports.monthly': 'Monthly volume',
+    'security.badge': 'PCI DSS Level 1',
+    'security.zeroStorage': 'Zero Data Storage',
+    'security.zeroStorageDesc': 'Tokenized processing ensures sensitive card data never touches our servers.',
+    'security.pciLevel': 'Level 1',
+    'security.pciAnnual': 'Annually Audited',
+    'suite.title': 'Everything You Need to Accept Payments',
+    'suite.subtitle': 'A complete suite of payment products designed to power your business across Europe and Africa.',
+    'suite.checkouts.title': 'Checkouts',
+    'suite.checkouts.desc': 'Build your own checkout page and payment form with Vanta Checkout. Seamlessly integrate into your website.',
+    'suite.pos.title': 'Vanta POS',
+    'suite.pos.desc': 'Accept in-person payments with our Point of Sale solution. Perfect for retail and service businesses.',
+    'suite.link.title': 'Payment Link',
+    'suite.link.desc': 'Create and share payment links instantly. Get paid faster without building a checkout page.',
+    'suite.collect.title': 'Collect',
+    'suite.collect.desc': 'Streamline payment collection from multiple sources. Automate recurring billing and invoicing.',
+    'suite.disburse.title': 'Disburse',
+    'suite.disburse.desc': 'Send bulk payments to multiple recipients. Perfect for payroll, vendor payments, and refunds.',
+    'suite.invoice.title': 'Invoice',
+    'suite.invoice.desc': 'Create and send professional invoices to your customers. Track payments and manage billing efficiently.',
     'auth.signout': 'Sign out',
     'auth.fullName': 'Full name',
     'forbidden.title': 'Restricted access',
@@ -1122,6 +1149,25 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'biz.payroll.run': 'Lancer la paie',
     'biz.payroll.paid': 'Payé',
     'biz.reports.monthly': 'Volume mensuel',
+    'security.badge': 'PCI DSS Niveau 1',
+    'security.zeroStorage': 'Zéro stockage de données',
+    'security.zeroStorageDesc': 'Le traitement tokenisé garantit que les données de carte sensibles ne touchent jamais nos serveurs.',
+    'security.pciLevel': 'Niveau 1',
+    'security.pciAnnual': 'Audité annuellement',
+    'suite.title': 'Tout ce qu\'il vous faut pour encaisser des paiements',
+    'suite.subtitle': 'Une suite complète de produits de paiement conçue pour faire grandir votre activité entre l\'Europe et l\'Afrique.',
+    'suite.checkouts.title': 'Checkouts',
+    'suite.checkouts.desc': 'Créez votre propre page de paiement avec Vanta Checkout. S\'intègre facilement à votre site.',
+    'suite.pos.title': 'Vanta POS',
+    'suite.pos.desc': 'Acceptez les paiements en personne avec notre solution de point de vente. Idéal pour le commerce et les services.',
+    'suite.link.title': 'Lien de paiement',
+    'suite.link.desc': 'Créez et partagez des liens de paiement instantanément. Soyez payé plus vite sans page de paiement.',
+    'suite.collect.title': 'Collecte',
+    'suite.collect.desc': 'Centralisez la collecte de paiements depuis plusieurs sources. Automatisez la facturation récurrente.',
+    'suite.disburse.title': 'Décaissement',
+    'suite.disburse.desc': 'Envoyez des paiements groupés à plusieurs destinataires. Idéal pour la paie, les fournisseurs et les remboursements.',
+    'suite.invoice.title': 'Facturation',
+    'suite.invoice.desc': 'Créez et envoyez des factures professionnelles à vos clients. Suivez les paiements facilement.',
     'auth.signout': 'Se déconnecter',
     'auth.fullName': 'Nom complet',
     'forbidden.title': 'Accès restreint',
