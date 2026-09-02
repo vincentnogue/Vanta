@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useI18n } from '@/i18n/I18nContext';
 import { getCurrencyByCode, formatCurrency } from '@/data/mockData';
 import { detectBrand, formatCardNumber, formatExpiry } from '@/data/cardUtils';
+import { CardBrandMark, ApplePayMark, GooglePayMark } from '@/components/CardBrandMark';
 import { addMoney, addPaymentMethod, useStore } from '@/data/store';
 import {
-  X, CreditCard, Smartphone, Landmark, Lock, Check, Loader2, ShieldCheck, Plus,
+  X, CreditCard, Landmark, Lock, Check, Loader2, ShieldCheck, Plus,
 } from 'lucide-react';
 
 type PayInMethod = 'card' | 'applepay' | 'googlepay' | 'sepa';
@@ -93,11 +94,11 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
     }, 1600);
   };
 
-  const methods: { id: PayInMethod; label: string; icon: typeof CreditCard }[] = [
-    { id: 'card', label: t('pay.method.card'), icon: CreditCard },
-    { id: 'applepay', label: 'Apple Pay', icon: Smartphone },
-    { id: 'googlepay', label: 'Google Pay', icon: Smartphone },
-    { id: 'sepa', label: t('pay.method.sepa'), icon: Landmark },
+  const methods: { id: PayInMethod; label: string }[] = [
+    { id: 'card', label: t('pay.method.card') },
+    { id: 'applepay', label: 'Apple Pay' },
+    { id: 'googlepay', label: 'Google Pay' },
+    { id: 'sepa', label: t('pay.method.sepa') },
   ];
 
   const cur = getCurrencyByCode(currency);
@@ -180,7 +181,10 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
                       : 'border-ink-200 hover:border-ink-300 hover:bg-ink-50'
                   }`}
                 >
-                  <m.icon className={`w-4 h-4 ${method === m.id ? 'text-vanta-600' : 'text-ink-400'}`} />
+                  {m.id === 'card' && <CreditCard className={`w-4 h-4 ${method === m.id ? 'text-vanta-600' : 'text-ink-400'}`} />}
+                  {m.id === 'applepay' && <ApplePayMark className="h-4 w-6 rounded" />}
+                  {m.id === 'googlepay' && <GooglePayMark className="h-4 w-6 rounded" />}
+                  {m.id === 'sepa' && <Landmark className={`w-4 h-4 ${method === m.id ? 'text-vanta-600' : 'text-ink-400'}`} />}
                   <span className={`text-[11px] font-semibold leading-tight ${method === m.id ? 'text-vanta-700' : 'text-ink-500'}`}>
                     {m.label}
                   </span>
@@ -206,9 +210,8 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
                           : 'border-ink-200 bg-white hover:border-ink-300'
                       }`}
                     >
-                      <CreditCard className={`w-4 h-4 flex-shrink-0 ${selectedCardId === pm.id ? 'text-vanta-600' : 'text-ink-400'}`} />
+                      <CardBrandMark brand={pm.brand} className="h-5 w-8 rounded flex-shrink-0" />
                       <span className="text-sm font-semibold text-ink-800 font-mono">•••• {pm.last4}</span>
-                      <span className="text-[10px] font-bold text-ink-500 border border-ink-300 rounded px-1.5 py-0.5">{pm.brand}</span>
                       <span className="ml-auto text-xs text-ink-400">{pm.expMonth}/{pm.expYear}</span>
                     </button>
                   ))}
@@ -245,7 +248,7 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                         {card.number.replace(/\s/g, '').length >= 2 ? (
-                          <span className="text-[10px] font-bold text-ink-600 border border-ink-300 rounded px-1.5 py-0.5">{brand}</span>
+                          <CardBrandMark brand={brand} className="h-5 w-8 rounded" />
                         ) : (
                           <CreditCard className="w-4 h-4 text-ink-300" />
                         )}
@@ -302,7 +305,7 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
           {(method === 'applepay' || method === 'googlepay') && (
             <div className="rounded-xl border border-ink-200 p-4 bg-ink-50/40">
               <p className="text-xs text-ink-500 flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-ink-400" />
+                {method === 'applepay' ? <ApplePayMark className="h-4 w-6 rounded" /> : <GooglePayMark className="h-4 w-6 rounded" />}
                 {t('pay.expressNote')}
               </p>
             </div>

@@ -3,6 +3,7 @@ import { useI18n } from '@/i18n/I18nContext';
 import { useRouter, type Route } from '@/router/RouterContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { PspCheckout } from '@/components/PspCheckout';
+import { CardBrandMark } from '@/components/CardBrandMark';
 import { formatCardNumber, formatExpiry, detectBrand } from '@/data/cardUtils';
 import { useStore, addPaymentMethod, removePaymentMethod, setDefaultPaymentMethod } from '@/data/store';
 import {
@@ -53,9 +54,7 @@ export function CardsPage() {
             {paymentMethods.map((pm, i) => (
               <div key={pm.id} className="card card-hover p-5 animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-vanta-600 to-vanta-800 flex items-center justify-center">
-                    <CreditCard className="w-5 h-5 text-white" />
-                  </div>
+                  <CardBrandMark brand={pm.brand} className="h-9 w-14 rounded-lg shadow-sm" />
                   {pm.isDefault && (
                     <span className="badge bg-vanta-50 text-vanta-700 inline-flex items-center gap-1">
                       <Star className="w-3 h-3" /> {t('cards.default')}
@@ -66,7 +65,7 @@ export function CardsPage() {
                   •••• {pm.last4}
                 </div>
                 <div className="text-xs text-ink-400 mt-1">
-                  {pm.brand} · {t('cards.expires')} {pm.expMonth}/{pm.expYear}
+                  {t('cards.expires')} {pm.expMonth}/{pm.expYear}
                 </div>
                 <div className="text-xs text-ink-400 mt-0.5 truncate">{pm.holder}</div>
                 <div className="flex items-center gap-2 mt-4 pt-4 border-t border-ink-100">
@@ -185,8 +184,8 @@ function AddCardModal({ onClose }: { onClose: () => void }) {
                   className="input text-sm font-mono pr-16"
                 />
                 {digits.length >= 2 && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-vanta-700 bg-vanta-50 px-1.5 py-0.5 rounded">
-                    {brand}
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <CardBrandMark brand={brand} className="h-5 w-8 rounded" />
                   </span>
                 )}
               </div>
