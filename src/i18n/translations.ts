@@ -93,7 +93,8 @@ export type TranslationKey =
   | 'suite.link.title' | 'suite.link.desc'
   | 'suite.collect.title' | 'suite.collect.desc'
   | 'suite.disburse.title' | 'suite.disburse.desc'
-  | 'suite.invoice.title' | 'suite.invoice.desc';
+  | 'suite.invoice.title' | 'suite.invoice.desc'
+  | 'auth.continueWithGoogle' | 'auth.or';
 export const translations: Record<Language, Partial<Record<TranslationKey, string>>> = {
   en: {
     'nav.home': 'Home',
@@ -581,6 +582,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'suite.disburse.desc': 'Send bulk payments to multiple recipients. Perfect for payroll, vendor payments, and refunds.',
     'suite.invoice.title': 'Invoice',
     'suite.invoice.desc': 'Create and send professional invoices to your customers. Track payments and manage billing efficiently.',
+    'auth.continueWithGoogle': 'Continue with Google',
+    'auth.or': 'or',
     'auth.signout': 'Sign out',
     'auth.fullName': 'Full name',
     'forbidden.title': 'Restricted access',
@@ -1168,6 +1171,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'suite.disburse.desc': 'Envoyez des paiements groupés à plusieurs destinataires. Idéal pour la paie, les fournisseurs et les remboursements.',
     'suite.invoice.title': 'Facturation',
     'suite.invoice.desc': 'Créez et envoyez des factures professionnelles à vos clients. Suivez les paiements facilement.',
+    'auth.continueWithGoogle': 'Continuer avec Google',
+    'auth.or': 'ou',
     'auth.signout': 'Se déconnecter',
     'auth.fullName': 'Nom complet',
     'forbidden.title': 'Accès restreint',

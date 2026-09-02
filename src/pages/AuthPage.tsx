@@ -3,7 +3,7 @@ import { useI18n } from '@/i18n/I18nContext';
 import { useRouter } from '@/router/RouterContext';
 import { Logo } from '@/components/Logo';
 import { LanguageToggle } from '@/components/LanguageToggle';
-import { signIn, signUp, isSuperAdminEmail } from '@/data/auth';
+import { signIn, signUp, signInWithGoogle, isSuperAdminEmail } from '@/data/auth';
 import { ArrowLeft, Mail, Lock, ArrowRight, Check, User, Building2, AlertCircle } from 'lucide-react';
 
 function initialAccountType(): 'personal' | 'business' {
@@ -24,6 +24,19 @@ export function AuthPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogle = async () => {
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      await signInWithGoogle();
+      // Browser redirects to Google; nothing further to do here.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +130,32 @@ export function AuthPage() {
               {t('tagline')}
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+            <button
+              type="button"
+              onClick={handleGoogle}
+              disabled={googleLoading}
+              className="mt-8 w-full flex items-center justify-center gap-3 h-12 rounded-lg border border-ink-200 bg-white font-semibold text-sm text-ink-700 hover:bg-ink-50 hover:border-ink-300 transition-all disabled:opacity-60"
+            >
+              {googleLoading ? (
+                <span className="w-4 h-4 border-2 border-ink-300 border-t-ink-600 rounded-full animate-spin" />
+              ) : (
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.66-.22-2.45H12v4.64h6.47a5.54 5.54 0 0 1-2.4 3.63v3h3.88c2.27-2.09 3.57-5.17 3.57-8.82z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.95-2.91l-3.88-3c-1.08.72-2.46 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.95H1.26v3.1A12 12 0 0 0 12 24z" />
+                  <path fill="#FBBC05" d="M5.27 14.29a7.2 7.2 0 0 1 0-4.58v-3.1H1.26a12 12 0 0 0 0 10.78z" />
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.26 6.61l4.01 3.1C6.22 6.86 8.87 4.75 12 4.75z" />
+                </svg>
+              )}
+              {t('auth.continueWithGoogle')}
+            </button>
+
+            <div className="mt-6 flex items-center gap-3 text-xs font-medium text-ink-400">
+              <span className="flex-1 h-px bg-ink-100" />
+              {t('auth.or')}
+              <span className="flex-1 h-px bg-ink-100" />
+            </div>
+
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
               {mode === 'signup' && (
                 <div>
                   <label className="block text-sm font-semibold text-ink-700 mb-2">

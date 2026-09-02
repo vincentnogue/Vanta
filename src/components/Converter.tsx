@@ -16,7 +16,7 @@ export function Converter() {
   const { t } = useI18n();
   const { navigate } = useRouter();
   const [amount, setAmount] = useState('1000');
-  const [from, setFrom] = useState('EUR');
+  const [from, setFrom] = useState('USD');
   const [to, setTo] = useState('XAF');
 
   const { fee, received, rate } = useMemo(() => {

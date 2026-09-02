@@ -5,11 +5,11 @@ import {
 } from 'lucide-react';
 
 const rows = [
-  { id: '#VNT-000042', date: 'Aug 23, 2026', name: 'Aminata Diallo', initials: 'AD', color: 'bg-vanta-500', rail: 'Wave', amount: '164,320 XAF', fee: '15.0 EUR', status: 'completed' },
-  { id: '#VNT-000041', date: 'Aug 23, 2026', name: 'Jean-Paul Mbarga', initials: 'JM', color: 'bg-accent-500', rail: 'Orange Money', amount: '410,800 XAF', fee: '30.0 EUR', status: 'processing' },
-  { id: '#VNT-000040', date: 'Aug 22, 2026', name: 'Chioma Okafor', initials: 'CO', color: 'bg-amber-500', rail: 'GTBank', amount: '2,150,000 NGN', fee: '60.0 EUR', status: 'completed' },
-  { id: '#VNT-000039', date: 'Aug 22, 2026', name: 'James Mwangi', initials: 'JW', color: 'bg-sky-500', rail: 'M-Pesa', amount: '28,400 KES', fee: '9.6 EUR', status: 'completed' },
-  { id: '#VNT-000038', date: 'Aug 21, 2026', name: 'Kwesi Mensah', initials: 'KM', color: 'bg-rose-500', rail: 'MTN Momo', amount: '5,180 GHS', fee: '18.0 EUR', status: 'review' },
+  { id: '#VNT-000042', date: 'Aug 23, 2026', name: 'Aminata Diallo', initials: 'AD', color: 'bg-vanta-500', rail: 'Wave', amount: '164,320 XAF', fee: '16.4 USD', status: 'completed' },
+  { id: '#VNT-000041', date: 'Aug 23, 2026', name: 'Jean-Paul Mbarga', initials: 'JM', color: 'bg-accent-500', rail: 'Orange Money', amount: '410,800 XAF', fee: '32.8 USD', status: 'processing' },
+  { id: '#VNT-000040', date: 'Aug 22, 2026', name: 'Chioma Okafor', initials: 'CO', color: 'bg-amber-500', rail: 'GTBank', amount: '2,150,000 NGN', fee: '65.6 USD', status: 'completed' },
+  { id: '#VNT-000039', date: 'Aug 22, 2026', name: 'James Mwangi', initials: 'JW', color: 'bg-sky-500', rail: 'M-Pesa', amount: '28,400 KES', fee: '10.5 USD', status: 'completed' },
+  { id: '#VNT-000038', date: 'Aug 21, 2026', name: 'Kwesi Mensah', initials: 'KM', color: 'bg-rose-500', rail: 'MTN Momo', amount: '5,180 GHS', fee: '19.7 USD', status: 'review' },
 ];
 
 const statusStyle: Record<string, string> = {
@@ -68,7 +68,7 @@ export function HeroMockup() {
             ))}
             <div className="mt-auto rounded-lg bg-white/5 border border-white/10 p-2.5">
               <div className="text-[9px] text-ink-400 uppercase tracking-wide">Treasury</div>
-              <div className="text-xs font-bold text-white mt-0.5">€4.2M</div>
+              <div className="text-xs font-bold text-white mt-0.5">$4.6M</div>
               <div className="flex items-center gap-1 text-[9px] text-vanta-300 mt-0.5">
                 <TrendingUp className="w-2.5 h-2.5" /> +12.4%
               </div>
@@ -85,7 +85,7 @@ export function HeroMockup() {
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <div className="text-[9px] text-ink-400">Account Balance</div>
-                  <div className="text-xs font-bold text-vanta-600">24,852 EUR</div>
+                  <div className="text-xs font-bold text-vanta-600">27,150 USD</div>
                 </div>
                 <RefreshCw className="w-3 h-3 text-ink-400" />
                 <Bell className="w-3.5 h-3.5 text-ink-400" />
@@ -158,9 +158,9 @@ export function HeroMockup() {
           </span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="font-display font-bold text-black">1,000 EUR</span>
+          <span className="font-display font-bold text-black">1,000 USD</span>
           <span className="text-vanta-500">→</span>
-          <span className="font-display font-bold text-vanta-600">655,300 XAF</span>
+          <span className="font-display font-bold text-vanta-600">603,400 XAF</span>
         </div>
         <div className="mt-2 h-1 rounded-full bg-ink-100 overflow-hidden">
           <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-vanta-500 to-accent-400 animate-shimmer shimmer-bg" />

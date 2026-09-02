@@ -1,18 +1,18 @@
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 const rates = [
-  { pair: 'EUR → XAF', value: '655.30', up: true },
-  { pair: 'EUR → XOF', value: '655.30', up: true },
-  { pair: 'EUR → NGN', value: '1,720.00', up: false },
-  { pair: 'EUR → KES', value: '141.20', up: true },
-  { pair: 'EUR → GHS', value: '15.80', up: false },
-  { pair: 'EUR → USD', value: '1.093', up: true },
-  { pair: 'EUR → GBP', value: '0.847', up: false },
-  { pair: 'EUR → AED', value: '4.015', up: true },
   { pair: 'USD → XAF', value: '603.40', up: true },
+  { pair: 'USD → XOF', value: '603.40', up: true },
+  { pair: 'USD → NGN', value: '1,580.00', up: false },
+  { pair: 'USD → KES', value: '129.30', up: true },
+  { pair: 'USD → GHS', value: '14.50', up: false },
+  { pair: 'USD → EUR', value: '0.915', up: true },
+  { pair: 'USD → GBP', value: '0.775', up: false },
+  { pair: 'USD → AED', value: '3.673', up: true },
+  { pair: 'EUR → XAF', value: '655.30', up: true },
   { pair: 'GBP → USD', value: '1.261', up: true },
-  { pair: 'EUR → UGX', value: '4,065.00', up: true },
-  { pair: 'EUR → ZAR', value: '21.10', up: true },
+  { pair: 'USD → UGX', value: '3,720.00', up: true },
+  { pair: 'USD → ZAR', value: '19.30', up: true },
 ];
 
 export function RateTicker() {

@@ -26,12 +26,12 @@ const trustFeatures = [
 ];
 
 const corridors = [
-  { from: '🇪🇺 Europe', to: '🇸🇳 Senegal', toFr: '🇸🇳 Sénégal', fee: '1.1%', speed: 'Instant' },
-  { from: '🇫🇷 France', to: '🇨🇲 Cameroon', toFr: '🇨🇲 Cameroun', fee: '1.1%', speed: 'Instant' },
-  { from: '🇧🇪 Belgium', to: '🇳🇬 Nigeria', toFr: '🇳🇬 Nigéria', fee: '0.9%', speed: '~30 s' },
-  { from: '🇦🇪 UAE', to: '🇰🇪 Kenya', toFr: '🇰🇪 Kenya', fee: '1.0%', speed: '~30 s' },
   { from: '🇺🇸 USA', to: '🇳🇬 Nigeria', toFr: '🇳🇬 Nigéria', fee: '0.8%', speed: '~3 min' },
-  { from: '🇬🇧 UK', to: '🇬🇭 Ghana', toFr: '🇬🇭 Ghana', fee: '1.0%', speed: 'Instant' },
+  { from: '🇺🇸 USA', to: '🇰🇪 Kenya', toFr: '🇰🇪 Kenya', fee: '1.0%', speed: '~30 s' },
+  { from: '🇺🇸 USA', to: '🇬🇭 Ghana', toFr: '🇬🇭 Ghana', fee: '1.0%', speed: 'Instant' },
+  { from: '🇪🇺 Europe', to: '🇸🇳 Senegal', toFr: '🇸🇳 Sénégal', fee: '1.1%', speed: 'Instant' },
+  { from: '🇬🇧 UK', to: '🇳🇬 Nigeria', toFr: '🇳🇬 Nigéria', fee: '0.9%', speed: '~30 s' },
+  { from: '🇦🇪 UAE', to: '🇰🇪 Kenya', toFr: '🇰🇪 Kenya', fee: '1.0%', speed: '~30 s' },
 ];
 
 const regions: (Region | 'All')[] = ['All', 'Africa', 'Europe', 'Asia', 'Americas', 'Oceania'];

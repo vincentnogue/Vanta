@@ -116,6 +116,14 @@ export async function signOut() {
   await supabase.auth.signOut();
 }
 
+export async function signInWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  });
+  if (error) throw error;
+}
+
 export async function submitKyc(details: { fullName: string; docType: string; docNumber: string }) {
   if (!state.user) return;
   const { error: kycError } = await supabase.from('kyc_submissions').insert({
