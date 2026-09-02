@@ -33,10 +33,12 @@ export function KycPage() {
         </h1>
         <p className="mt-3 text-ink-500 max-w-md">{t('kyc.pending.subtitle')}</p>
         <div className="mt-8 flex flex-col sm:flex-row items-center gap-3">
-          <button onClick={() => { approveKyc(); navigate('consumer'); }} className="btn-primary">
-            <Check className="w-4 h-4" />
-            {t('kyc.pending.simulate')}
-          </button>
+          {user.role === 'superadmin' && (
+            <button onClick={() => { approveKyc(); navigate('consumer'); }} className="btn-primary">
+              <Check className="w-4 h-4" />
+              {t('kyc.pending.simulate')}
+            </button>
+          )}
           <button onClick={() => { signOut(); navigate('home'); }} className="btn-outline">
             <LogOut className="w-4 h-4" />
             {t('auth.signout')}
@@ -163,7 +165,11 @@ export function KycPage() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
-                <button onClick={() => canNext && submitKyc()} disabled={!canNext} className="btn-primary text-sm disabled:opacity-50">
+                <button
+                  onClick={() => canNext && submitKyc({ fullName, docType, docNumber })}
+                  disabled={!canNext}
+                  className="btn-primary text-sm disabled:opacity-50"
+                >
                   <ShieldCheck className="w-4 h-4" />
                   {t('kyc.submit')}
                 </button>

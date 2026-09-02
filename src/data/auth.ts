@@ -116,11 +116,21 @@ export async function signOut() {
   await supabase.auth.signOut();
 }
 
-export async function submitKyc() {
+export async function submitKyc(details: { fullName: string; docType: string; docNumber: string }) {
   if (!state.user) return;
-  const { error } = await supabase.from('profiles').update({ kyc_status: 'pending' }).eq('id', state.user.id);
+  const { error: kycError } = await supabase.from('kyc_submissions').insert({
+    user_id: state.user.id,
+    doc_type: details.docType,
+    doc_number: details.docNumber,
+    status: 'pending',
+  });
+  if (kycError) return;
+  const { error } = await supabase
+    .from('profiles')
+    .update({ kyc_status: 'pending', full_name: details.fullName })
+    .eq('id', state.user.id);
   if (error) return;
-  state = { ...state, user: { ...state.user, kycStatus: 'pending' } };
+  state = { ...state, user: { ...state.user, kycStatus: 'pending', name: details.fullName || state.user.name } };
   emit();
 }
 
@@ -128,6 +138,11 @@ export async function approveKyc() {
   if (!state.user) return;
   const { error } = await supabase.from('profiles').update({ kyc_status: 'verified' }).eq('id', state.user.id);
   if (error) return;
+  await supabase
+    .from('kyc_submissions')
+    .update({ status: 'verified', reviewed_at: new Date().toISOString() })
+    .eq('user_id', state.user.id)
+    .eq('status', 'pending');
   state = { ...state, user: { ...state.user, kycStatus: 'verified' } };
   emit();
 }
