@@ -17,6 +17,7 @@ import { CountUp } from '@/components/CountUp';
 import { Reveal } from '@/components/Reveal';
 import { Converter } from '@/components/Converter';
 import { FlagRiver } from '@/components/FlagRiver';
+import { CircleFlag } from '@/components/CircleFlag';
 import { ShieldCheck as ShieldCheckIcon, Globe2 as Globe2Icon, Scale } from 'lucide-react';
 
 const trustFeatures = [
@@ -581,7 +582,7 @@ export function LandingPage() {
                     key={country.code}
                     className="card p-3 flex items-center gap-2.5 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
                   >
-                    <span className="text-xl">{country.flag}</span>
+                    <CircleFlag countryCode={country.code} size={28} />
                     <div className="min-w-0">
                       <div className="text-[13px] font-semibold text-ink-800 truncate">
                         {lang === 'fr' ? country.nameFr : country.name}
@@ -608,7 +609,7 @@ export function LandingPage() {
                         key={`${country.code}-${i}`}
                         className="card px-4 py-2.5 flex items-center gap-2.5 shrink-0 hover:shadow-lg hover:border-vanta-300 transition-all duration-300"
                       >
-                        <span className="text-lg">{country.flag}</span>
+                        <CircleFlag countryCode={country.code} size={22} />
                         <span className="text-[13px] font-semibold text-ink-800 whitespace-nowrap">
                           {lang === 'fr' ? country.nameFr : country.name}
                         </span>

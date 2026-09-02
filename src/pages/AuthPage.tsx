@@ -66,7 +66,19 @@ export function AuthPage() {
     <div className="min-h-screen flex">
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-vanta-950 relative overflow-hidden flex-col justify-between p-12">
-        <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+        <video
+          className="absolute inset-0 w-full h-full object-cover opacity-40"
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster="https://images.pexels.com/videos/30289541/analysis-bitcoin-chart-chart-analysis-30289541.jpeg?auto=compress&cs=tinysrgb&h=900&fit=crop"
+          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+        >
+          <source src="https://videos.pexels.com/video-files/30289541/12984422_1920_1080_100fps.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-vanta-950/95 via-vanta-950/80 to-vanta-950/95" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-20" />
         <div className="absolute top-1/4 left-0 w-[400px] h-[400px] bg-accent-500/15 blur-[120px]" />
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-vanta-500/20 blur-[100px]" />
 

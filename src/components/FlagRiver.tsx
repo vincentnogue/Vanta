@@ -1,28 +1,12 @@
 import { useMemo } from 'react';
 import { countries } from '@/data/mockData';
 import { useI18n } from '@/i18n/I18nContext';
+import { CircleFlag } from '@/components/CircleFlag';
 
 function FlagPill({ countryCode, name, code }: { countryCode: string; name: string; code: string }) {
   return (
     <span className="inline-flex items-center gap-2.5 mx-2 ps-1.5 pe-4 py-1.5 rounded-full bg-white border border-ink-200/80 shadow-sm hover:shadow-md hover:border-vanta-300 hover:-translate-y-0.5 transition-all duration-300">
-      <span className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-ink-100 shrink-0 bg-ink-50">
-        <img
-          src={`https://hatscripts.github.io/circle-flags/flags/${countryCode.toLowerCase()}.svg`}
-          alt={name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-          width={32}
-          height={32}
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-            const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
-            if (fallback) fallback.style.display = 'flex';
-          }}
-        />
-        <span className="hidden w-full h-full items-center justify-center bg-vanta-100 text-vanta-700 text-[10px] font-bold">
-          {countryCode}
-        </span>
-      </span>
+      <CircleFlag countryCode={countryCode} size={32} />
       <span className="text-sm font-semibold text-ink-700 whitespace-nowrap">{name}</span>
       <span className="text-[11px] font-mono font-medium text-vanta-600 whitespace-nowrap">{code}</span>
     </span>
