@@ -42,6 +42,14 @@ export function useAuth(): AuthState {
   return useSyncExternalStore(subscribe, getSnapshot);
 }
 
+export function getCurrentUser(): User | null {
+  return state.user;
+}
+
+export function onAuthChange(listener: () => void): () => void {
+  return subscribe(listener);
+}
+
 async function loadProfile(userId: string, fallbackEmail: string): Promise<User> {
   const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (!data) {

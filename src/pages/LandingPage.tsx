@@ -190,10 +190,14 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* Product mockup, straight under the fold like the reference design */}
+        {/* Product mockup — cropped like the reference: only the top half is
+            visible, the rest implied below the fold with a soft fade */}
         <div className="section-padding max-w-6xl mx-auto relative z-10 mt-16 lg:mt-20">
           <Reveal delay={150}>
-            <HeroMockup />
+            <div className="relative h-[220px] sm:h-[280px] lg:h-[340px] overflow-hidden rounded-2xl">
+              <HeroMockup />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white via-white/70 to-transparent" />
+            </div>
           </Reveal>
         </div>
 
