@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useI18n } from '@/i18n/I18nContext';
 import { getCurrencyByCode, formatCurrency } from '@/data/mockData';
 import { detectBrand, formatCardNumber, formatExpiry } from '@/data/cardUtils';
 import { CardBrandMark, ApplePayMark, GooglePayMark } from '@/components/CardBrandMark';
-import { addMoney, addPaymentMethod, useStore } from '@/data/store';
+import { addMoney, addPaymentMethod, refreshStore, useStore } from '@/data/store';
+import { createPaymentIntent } from '@/data/payments';
+import { getStripe, isStripeConfigured } from '@/lib/stripe';
 import {
-  X, CreditCard, Landmark, Lock, Check, Loader2, ShieldCheck, Plus,
+  X, CreditCard, Landmark, Lock, Check, Loader2, ShieldCheck, Plus, AlertCircle,
 } from 'lucide-react';
 
 type PayInMethod = 'card' | 'applepay' | 'googlepay' | 'sepa';
@@ -19,26 +22,56 @@ type Props = {
   onClose: () => void;
 };
 
-export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId, onClose }: Props) {
+const cardElementStyle = {
+  style: {
+    base: {
+      fontSize: '15px',
+      fontFamily: 'Poppins, system-ui, sans-serif',
+      color: '#0f172a',
+      '::placeholder': { color: '#94a3b8' },
+    },
+    invalid: { color: '#dc2626' },
+  },
+};
+
+export function PspCheckout(props: Props) {
+  // Only mount the Elements provider when a real publishable key is set —
+  // avoids loading Stripe.js at all in pure demo mode.
+  if (isStripeConfigured()) {
+    return (
+      <Elements stripe={getStripe()}>
+        <PspCheckoutInner {...props} />
+      </Elements>
+    );
+  }
+  return <PspCheckoutInner {...props} />;
+}
+
+function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, onClose }: Props) {
   const { t } = useI18n();
   const { paymentMethods } = useStore();
+  const stripe = useStripe();
+  const elements = useElements();
   const [currency, setCurrency] = useState(defaultCurrency);
   const [amount, setAmount] = useState('');
   const [method, setMethod] = useState<PayInMethod>('card');
   const [phase, setPhase] = useState<Phase>('form');
   const [card, setCard] = useState({ number: '', expiry: '', cvc: '' });
   const [cardError, setCardError] = useState(false);
+  const [stripeErrorMsg, setStripeErrorMsg] = useState<string | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string>('new');
   const [saveCard, setSaveCard] = useState(true);
 
   const brand = useMemo(() => detectBrand(card.number.replace(/\s/g, '')), [card.number]);
   const amountNum = parseFloat(amount);
   const usingSavedCard = method === 'card' && selectedCardId !== 'new';
+  const useRealStripe = isStripeConfigured() && method === 'card' && !usingSavedCard;
 
   useEffect(() => {
     if (open) {
       setPhase('form');
       setCardError(false);
+      setStripeErrorMsg(null);
       setCard({ number: '', expiry: '', cvc: '' });
       setMethod('card');
       const preferred = paymentMethods.find((p) => p.id === defaultMethodId)
@@ -59,8 +92,49 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
 
   if (!open) return null;
 
-  const startPayment = () => {
+  const startPayment = async () => {
     if (!amountNum || amountNum <= 0 || phase !== 'form') return;
+    setStripeErrorMsg(null);
+
+    // Real Stripe path: new card, key configured.
+    if (useRealStripe) {
+      if (!stripe || !elements) return;
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) return;
+      setPhase('processing');
+      try {
+        const { clientSecret } = await createPaymentIntent(amountNum, currency);
+        const result = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: { card: cardElement },
+        });
+        if (result.error) {
+          setStripeErrorMsg(result.error.message ?? t('pay.cardError'));
+          setPhase('form');
+          return;
+        }
+        if (result.paymentIntent?.status === 'succeeded') {
+          setPhase('success');
+          // The Stripe webhook — not this client — is what actually credits the
+          // balance and writes the transaction. Give it a moment, then re-pull
+          // real data from Supabase instead of guessing the new balance locally.
+          setTimeout(() => {
+            refreshStore();
+            onClose();
+            setAmount('');
+          }, 2200);
+        } else {
+          setStripeErrorMsg(t('pay.cardError'));
+          setPhase('form');
+        }
+      } catch (err) {
+        setStripeErrorMsg(err instanceof Error ? err.message : String(err));
+        setPhase('form');
+      }
+      return;
+    }
+
+    // Demo / simulated path: sandbox card fields (Stripe not connected yet),
+    // saved-card reuse, SEPA, Apple Pay, Google Pay.
     if (method === 'card' && !usingSavedCard) {
       const digits = card.number.replace(/\s/g, '');
       const valid = digits.length >= 15 && card.expiry.length === 5 && card.cvc.length >= 3;
@@ -114,9 +188,12 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
           <div className="flex items-center gap-2 text-xs font-semibold text-accent-400">
             <Lock className="w-3.5 h-3.5" />
             {t('pay.secure')}
+            {!isStripeConfigured() && (
+              <span className="ml-1 badge bg-white/10 text-ink-300 text-[9px] py-0.5">{t('pay.demoMode')}</span>
+            )}
           </div>
           <h2 className="font-display text-lg font-bold text-white mt-1">{t('pay.title')}</h2>
-          {(parseFloat(amount) ?? 0) > 0 ? (
+          {(parseFloat(amount) || 0) > 0 ? (
             <p className="font-display text-2xl font-bold text-white mt-1">
               {formatCurrency(parseFloat(amount), currency)}
             </p>
@@ -233,7 +310,33 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
                 </div>
               )}
 
-              {!usingSavedCard && (
+              {!usingSavedCard && isStripeConfigured() && (
+                <>
+                  <div>
+                    <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.cardNumber')}</label>
+                    <div className="rounded-lg border border-ink-200 bg-white px-3.5 py-3 focus-within:ring-2 focus-within:ring-vanta-500/20 focus-within:border-vanta-500 transition-all">
+                      <CardElement options={cardElementStyle} onChange={() => setStripeErrorMsg(null)} />
+                    </div>
+                  </div>
+                  <label className="flex items-center gap-2 text-xs text-ink-500 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saveCard}
+                      onChange={(e) => setSaveCard(e.target.checked)}
+                      disabled={phase !== 'form'}
+                      className="w-3.5 h-3.5 rounded border-ink-300 text-vanta-600 focus:ring-vanta-500"
+                    />
+                    {t('pay.saveCard')}
+                  </label>
+                  {stripeErrorMsg && (
+                    <p className="text-xs text-danger-600 font-medium flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {stripeErrorMsg}
+                    </p>
+                  )}
+                </>
+              )}
+
+              {!usingSavedCard && !isStripeConfigured() && (
                 <>
                   <div>
                     <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.cardNumber')}</label>
@@ -241,7 +344,7 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
                       <input
                         value={card.number}
                         onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })}
-                        placeholder="1234 5678 9012 3456"
+                        placeholder="4242 4242 4242 4242"
                         inputMode="numeric"
                         className="input py-2.5 pr-16"
                         disabled={phase !== 'form'}
@@ -314,7 +417,7 @@ export function PspCheckout({ open, currencies, defaultCurrency, defaultMethodId
           {/* Submit */}
           <button
             type="submit"
-            disabled={phase !== 'form' || !amount || parseFloat(amount) <= 0}
+            disabled={phase !== 'form' || !amount || parseFloat(amount) <= 0 || (useRealStripe && (!stripe || !elements))}
             className="btn-primary w-full py-3.5 text-base"
           >
             {phase === 'processing' ? (

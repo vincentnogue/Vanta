@@ -139,6 +139,10 @@ if (initialUser) {
   state = { ...state, loading: false };
 }
 
+export function refreshStore() {
+  if (currentUserId) loadForUser(currentUserId);
+}
+
 export function nextTxId(): string {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const rand = Math.floor(Math.random() * 900000000 + 100000000);

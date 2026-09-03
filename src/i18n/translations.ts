@@ -63,7 +63,7 @@ export type TranslationKey =
   | 'sup.tickets' | 'sup.new' | 'sup.subject' | 'sup.message' | 'sup.send' | 'sup.open' | 'sup.resolved' | 'sup.sent'
   | 'bal.addTitle' | 'bal.amount' | 'bal.confirm' | 'bal.added'
   | 'rec.form.title' | 'rec.form.name' | 'rec.form.detail' | 'rec.form.save'
-  | 'pay.secure' | 'pay.title' | 'pay.chooseAmount' | 'pay.amount' | 'pay.currency' | 'pay.method' | 'pay.method.card' | 'pay.method.sepa'
+  | 'pay.secure' | 'pay.title' | 'pay.chooseAmount' | 'pay.amount' | 'pay.currency' | 'pay.method' | 'pay.method.card' | 'pay.method.sepa' | 'pay.demoMode'
   | 'pay.cardNumber' | 'pay.expiry' | 'pay.cvc' | 'pay.cardError' | 'pay.sepaNote' | 'pay.expressNote'
   | 'pay.processing' | 'pay.success' | 'pay.pay' | 'pay.poweredBy' | 'pay.newCard' | 'pay.saveCard'
   | 'nav.superadmin' | 'sa.title'
@@ -542,6 +542,7 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'rec.form.save': 'Save recipient',
 
     'pay.secure': 'Secure payment',
+    'pay.demoMode': 'Demo mode',
     'pay.title': 'Add money',
     'pay.chooseAmount': 'Choose an amount to top up',
     'pay.amount': 'Amount',
@@ -1138,6 +1139,7 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'rec.form.save': 'Enregistrer',
 
     'pay.secure': 'Paiement sécurisé',
+    'pay.demoMode': 'Mode démo',
     'pay.title': 'Ajouter de l’argent',
     'pay.chooseAmount': 'Choisissez un montant à ajouter',
     'pay.amount': 'Montant',
