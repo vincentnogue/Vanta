@@ -94,7 +94,10 @@ export type TranslationKey =
   | 'suite.collect.title' | 'suite.collect.desc'
   | 'suite.disburse.title' | 'suite.disburse.desc'
   | 'suite.invoice.title' | 'suite.invoice.desc'
-  | 'auth.continueWithGoogle' | 'auth.or';
+  | 'auth.continueWithGoogle' | 'auth.or'
+  | 'realworld.badge' | 'realworld.title' | 'realworld.subtitle'
+  | 'realworld.point1' | 'realworld.point2' | 'realworld.point3'
+  | 'realworld.stat.label';
 export const translations: Record<Language, Partial<Record<TranslationKey, string>>> = {
   en: {
     'nav.home': 'Home',
@@ -112,7 +115,7 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'hero.badge': 'Global Money Movement Infrastructure',
     'hero.title': 'Move money',
     'hero.titleHighlight': 'anywhere',
-    'hero.subtitle': 'A single platform for international transfers, cross-border payments, FX, and global payouts. Built for consumers, businesses, and developers.',
+    'hero.subtitle': 'The infrastructure serious businesses build on to move money in and out of Africa — instant settlement, transparent pricing, bank-grade security.',
     'hero.cta': 'Start sending',
     'hero.ctaSecondary': 'Explore the API',
     'hero.stat1': '190+',
@@ -569,7 +572,7 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'security.pciLevel': 'Level 1',
     'security.pciAnnual': 'Annually Audited',
     'suite.title': 'Everything You Need to Accept Payments',
-    'suite.subtitle': 'A complete suite of payment products designed to power your business across Europe and Africa.',
+    'suite.subtitle': 'Checkout, collection, and payouts on one reliable rail — priced for scale, built for how money actually moves across Africa.',
     'suite.checkouts.title': 'Checkouts',
     'suite.checkouts.desc': 'Build your own checkout page and payment form with Vanta Checkout. Seamlessly integrate into your website.',
     'suite.pos.title': 'Vanta POS',
@@ -584,6 +587,13 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'suite.invoice.desc': 'Create and send professional invoices to your customers. Track payments and manage billing efficiently.',
     'auth.continueWithGoogle': 'Continue with Google',
     'auth.or': 'or',
+    'realworld.badge': 'Built for real markets',
+    'realworld.title': 'Not a demo. Built for how money actually moves.',
+    'realworld.subtitle': 'From a market stall in Nairobi to a checkout page in Brussels — the same rails, the same guarantees, every time.',
+    'realworld.point1': 'Real bank and mobile money rails, not a sandboxed simulation',
+    'realworld.point2': 'Fees and settlement time shown up front, before you send',
+    'realworld.point3': 'Every transaction traceable, every balance reconciled',
+    'realworld.stat.label': 'markets supported',
     'auth.signout': 'Sign out',
     'auth.fullName': 'Full name',
     'forbidden.title': 'Restricted access',
@@ -701,7 +711,7 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'hero.badge': 'Infrastructure Mondiale de Transfert d\u2019Argent',
     'hero.title': 'Déplacez votre argent',
     'hero.titleHighlight': 'partout',
-    'hero.subtitle': 'Une seule plateforme pour les transferts internationaux, les paiements transfrontaliers, le change et les paiements mondiaux. Conçu pour les particuliers, les entreprises et les développeurs.',
+    'hero.subtitle': 'L\'infrastructure sur laquelle les entreprises sérieuses s\'appuient pour faire circuler l\'argent vers et depuis l\'Afrique — règlement instantané, tarification transparente, sécurité de niveau bancaire.',
     'hero.cta': 'Envoyer',
     'hero.ctaSecondary': 'Explorer l\u2019API',
     'hero.stat1': '190+',
@@ -1158,7 +1168,7 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'security.pciLevel': 'Niveau 1',
     'security.pciAnnual': 'Audité annuellement',
     'suite.title': 'Tout ce qu\'il vous faut pour encaisser des paiements',
-    'suite.subtitle': 'Une suite complète de produits de paiement conçue pour faire grandir votre activité entre l\'Europe et l\'Afrique.',
+    'suite.subtitle': 'Encaissement, collecte et décaissement sur un seul rail fiable — tarifé pour l\'échelle, pensé pour la façon dont l\'argent circule réellement en Afrique.',
     'suite.checkouts.title': 'Checkouts',
     'suite.checkouts.desc': 'Créez votre propre page de paiement avec Vanta Checkout. S\'intègre facilement à votre site.',
     'suite.pos.title': 'Vanta POS',
@@ -1173,6 +1183,13 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'suite.invoice.desc': 'Créez et envoyez des factures professionnelles à vos clients. Suivez les paiements facilement.',
     'auth.continueWithGoogle': 'Continuer avec Google',
     'auth.or': 'ou',
+    'realworld.badge': 'Conçu pour de vrais marchés',
+    'realworld.title': 'Pas une démo. Pensé pour la façon dont l\'argent circule vraiment.',
+    'realworld.subtitle': 'D\'un étal de marché à Nairobi à une page de paiement à Bruxelles — les mêmes rails, les mêmes garanties, à chaque fois.',
+    'realworld.point1': 'De vrais rails bancaires et mobile money, pas une simulation en bac à sable',
+    'realworld.point2': 'Frais et délai de règlement affichés avant l\'envoi',
+    'realworld.point3': 'Chaque transaction traçable, chaque solde réconcilié',
+    'realworld.stat.label': 'marchés couverts',
     'auth.signout': 'Se déconnecter',
     'auth.fullName': 'Nom complet',
     'forbidden.title': 'Accès restreint',

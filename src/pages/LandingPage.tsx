@@ -338,6 +338,65 @@ export function LandingPage() {
         </Reveal>
       </section>
 
+      {/* Real-world proof — real photography, not stock illustration icons */}
+      <section className="relative overflow-hidden">
+        <div className="relative h-[520px] lg:h-[600px]">
+          <img
+            src="https://images.pexels.com/photos/29069329/pexels-photo-29069329/free-photo-of-stunning-nairobi-skyline-at-dusk.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1200&fit=crop"
+            alt="Nairobi skyline at dusk"
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-vanta-950/95 via-vanta-950/80 to-vanta-950/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-vanta-950/90 via-transparent to-transparent" />
+
+          <div className="relative h-full section-padding max-w-6xl mx-auto flex items-center">
+            <div className="max-w-xl">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-white text-sm font-medium">
+                <Globe2 className="w-4 h-4" />
+                {t('realworld.badge')}
+              </div>
+              <h2 className="mt-5 font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight text-balance">
+                {t('realworld.title')}
+              </h2>
+              <p className="mt-4 text-lg text-ink-200 max-w-lg">{t('realworld.subtitle')}</p>
+
+              <ul className="mt-8 space-y-3">
+                {[t('realworld.point1'), t('realworld.point2'), t('realworld.point3')].map((point, i) => (
+                  <li key={i} className="flex items-start gap-3 text-ink-100">
+                    <CheckCircle2 className="w-5 h-5 text-accent-400 shrink-0 mt-0.5" />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-10 flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden ring-1 ring-white/20 shrink-0">
+                  <img
+                    src="https://images.pexels.com/photos/5410100/pexels-photo-5410100.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop"
+                    alt="Small business owner using mobile payments"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="w-16 h-16 rounded-2xl overflow-hidden ring-1 ring-white/20 shrink-0">
+                  <img
+                    src="https://images.pexels.com/photos/5239818/pexels-photo-5239818.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop"
+                    alt="Contactless card payment close-up"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="pl-2">
+                  <div className="font-display text-2xl font-bold text-white">{countries.length}+</div>
+                  <div className="text-sm text-ink-300">{t('realworld.stat.label')}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How it works */}
       <section className="py-24 bg-ink-50/60 border-y border-ink-100">
         <Reveal>
@@ -664,14 +723,21 @@ export function LandingPage() {
               </ul>
             </div>
 
-            {/* Right: PCI DSS badge card */}
+            {/* Right: PCI DSS badge card, with real payment photography */}
             <div className="flex flex-col items-center">
-              <div className="w-full max-w-xs card p-8 flex items-center justify-center">
-                <div className="flex items-center gap-3">
-                  <ShieldCheck className="w-14 h-14 text-vanta-600" strokeWidth={1.5} />
+              <div className="relative w-full max-w-xs rounded-2xl overflow-hidden shadow-xl">
+                <img
+                  src="https://images.pexels.com/photos/5239818/pexels-photo-5239818.jpeg?auto=compress&cs=tinysrgb&w=800&h=800&fit=crop"
+                  alt="Contactless card payment"
+                  className="w-full h-56 object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-vanta-950/80 via-vanta-950/10 to-transparent" />
+                <div className="absolute bottom-0 inset-x-0 p-5 flex items-center gap-3">
+                  <ShieldCheck className="w-9 h-9 text-white" strokeWidth={1.5} />
                   <div className="text-left">
-                    <div className="font-display font-black text-xl text-vanta-900 leading-tight">PCI DSS</div>
-                    <div className="text-xs font-semibold text-vanta-600 tracking-wide">COMPLIANT</div>
+                    <div className="font-display font-black text-lg text-white leading-tight">PCI DSS</div>
+                    <div className="text-[11px] font-semibold text-white/80 tracking-wide">COMPLIANT</div>
                   </div>
                 </div>
               </div>
