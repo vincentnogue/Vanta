@@ -55,13 +55,13 @@ export function DashboardLayout({ children, navItems, activeRoute }: { children:
                 }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? 'bg-accent-500/15 text-accent-400'
+                    ? 'bg-vanta-500/15 text-vanta-300'
                     : 'text-ink-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />
                 {item.label}
-                {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-accent-400" />}
+                {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-vanta-400" />}
               </button>
             );
           })}
@@ -76,7 +76,7 @@ export function DashboardLayout({ children, navItems, activeRoute }: { children:
                 onClick={() => { navigate(item.route); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? 'bg-accent-500/15 text-accent-400'
+                    ? 'bg-vanta-500/15 text-vanta-300'
                     : 'text-ink-400 hover:text-white hover:bg-white/5'
                 }`}
               >
