@@ -7,6 +7,8 @@ import { CardBrandMark, ApplePayMark, GooglePayMark } from '@/components/CardBra
 import { addMoney, addPaymentMethod, refreshStore, useStore } from '@/data/store';
 import { createPaymentIntent } from '@/data/payments';
 import { getStripe, isStripeConfigured } from '@/lib/stripe';
+import { getCurrentUser } from '@/data/auth';
+import { Logo } from '@/components/Logo';
 import {
   X, CreditCard, Landmark, Lock, Check, Loader2, ShieldCheck, Plus, AlertCircle,
 } from 'lucide-react';
@@ -59,10 +61,12 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
   const [card, setCard] = useState({ number: '', expiry: '', cvc: '' });
   const [cardError, setCardError] = useState(false);
   const [stripeErrorMsg, setStripeErrorMsg] = useState<string | null>(null);
+  const [cardFocused, setCardFocused] = useState(false);
   const [selectedCardId, setSelectedCardId] = useState<string>('new');
   const [saveCard, setSaveCard] = useState(true);
 
   const brand = useMemo(() => detectBrand(card.number.replace(/\s/g, '')), [card.number]);
+  const currentUserEmail = getCurrentUser()?.email;
   const amountNum = parseFloat(amount);
   const usingSavedCard = method === 'card' && selectedCardId !== 'new';
   const useRealStripe = isStripeConfigured() && method === 'card' && !usingSavedCard;
@@ -181,24 +185,28 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in" onClick={onClose}>
       <div className="card w-full max-w-md overflow-hidden animate-pop shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="bg-vanta-950 px-6 py-5 relative">
-          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg text-ink-400 hover:bg-white/10">
+        <div className="bg-vanta-950 px-6 pt-6 pb-7 relative">
+          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg text-ink-400 hover:bg-white/10 hover:text-white transition-colors">
             <X className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-2 text-xs font-semibold text-accent-400">
+          <Logo dark size="sm" />
+          <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-accent-400">
             <Lock className="w-3.5 h-3.5" />
             {t('pay.secure')}
             {!isStripeConfigured() && (
               <span className="ml-1 badge bg-white/10 text-ink-300 text-[9px] py-0.5">{t('pay.demoMode')}</span>
             )}
           </div>
-          <h2 className="font-display text-lg font-bold text-white mt-1">{t('pay.title')}</h2>
+          <h2 className="font-display text-sm font-medium text-ink-300 mt-2">{t('pay.title')}</h2>
           {(parseFloat(amount) || 0) > 0 ? (
-            <p className="font-display text-2xl font-bold text-white mt-1">
+            <p className="font-display text-3xl font-bold text-white mt-0.5 tabular-nums">
               {formatCurrency(parseFloat(amount), currency)}
             </p>
           ) : (
             <p className="text-sm text-ink-400 mt-1">{t('pay.chooseAmount')}</p>
+          )}
+          {currentUserEmail && (
+            <p className="text-[11px] text-ink-400 mt-2">{t('pay.receiptTo')} <span className="text-ink-200">{currentUserEmail}</span></p>
           )}
         </div>
 
@@ -314,8 +322,17 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
                 <>
                   <div>
                     <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('pay.cardNumber')}</label>
-                    <div className="rounded-lg border border-ink-200 bg-white px-3.5 py-3 focus-within:ring-2 focus-within:ring-vanta-500/20 focus-within:border-vanta-500 transition-all">
-                      <CardElement options={cardElementStyle} onChange={() => setStripeErrorMsg(null)} />
+                    <div
+                      className={`rounded-lg border bg-white px-3.5 py-3 transition-all ${
+                        cardFocused ? 'border-vanta-500 ring-2 ring-vanta-500/20' : 'border-ink-200'
+                      }`}
+                    >
+                      <CardElement
+                        options={cardElementStyle}
+                        onChange={() => setStripeErrorMsg(null)}
+                        onFocus={() => setCardFocused(true)}
+                        onBlur={() => setCardFocused(false)}
+                      />
                     </div>
                   </div>
                   <label className="flex items-center gap-2 text-xs text-ink-500 cursor-pointer">
@@ -429,9 +446,15 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
             )}
           </button>
 
-          <div className="flex items-center justify-center gap-2 text-[11px] text-ink-400">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            {t('pay.poweredBy')}
+          <div className="flex items-center justify-center gap-1.5 text-[11px] text-ink-400">
+            <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+            {isStripeConfigured() ? (
+              <span>
+                {t('pay.secure')} · {t('pay.poweredByStripe')}
+              </span>
+            ) : (
+              t('pay.poweredBy')
+            )}
           </div>
         </form>
       </div>
