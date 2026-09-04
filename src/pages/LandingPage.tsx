@@ -210,37 +210,11 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Live FX ticker */}
-      <RateTicker />
-
       {/* Flags river — 194 countries in motion */}
       <FlagRiver />
 
-      {/* Live rate calculator */}
-      <section className="py-16 sm:py-24 bg-white">
-        <div className="section-padding max-w-6xl mx-auto">
-          <Reveal className="text-center max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-vanta-50 border border-vanta-100 text-vanta-700 text-sm font-medium">
-              <span className="w-2 h-2 rounded-full bg-vanta-500 animate-pulse" />
-              {t('showcase.badge')}
-            </div>
-            <h2 className="mt-5 font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-black tracking-tight">
-              {t('showcase.title')}
-            </h2>
-            <p className="mt-4 text-lg text-ink-500">{t('showcase.subtitle')}</p>
-          </Reveal>
-          <Reveal delay={150} className="mt-12 max-w-md mx-auto">
-            <Converter />
-            <button
-              onClick={() => navigate('auth')}
-              className="mt-6 mx-auto flex items-center gap-2 text-vanta-700 font-semibold text-sm hover:gap-3 transition-all"
-            >
-              {t('showcase.cta')}
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </Reveal>
-        </div>
-      </section>
+      {/* Live FX ticker */}
+      <RateTicker />
 
       {/* Stats strip */}
       <section className="border-b border-ink-100 bg-white relative z-10">
@@ -426,77 +400,6 @@ export function LandingPage() {
         </Reveal>
       </section>
 
-      {/* PSP — VantaPay rails */}
-      <section className="py-24 bg-vanta-950 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-accent-500/10 blur-[120px]" />
-        <Reveal>
-        <div className="section-padding max-w-6xl mx-auto relative">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="inline-flex items-center gap-2 text-xs font-semibold text-accent-400 bg-accent-500/10 border border-accent-500/20 rounded-full px-3 py-1.5">
-              <Lock className="w-3.5 h-3.5" />
-              {t('psp.badge')}
-            </span>
-            <h2 className="mt-5 font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight">
-              {t('psp.title')}
-            </h2>
-            <p className="mt-4 text-lg text-ink-300">{t('psp.subtitle')}</p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { icon: CreditCard, label: t('pay.method.card'), sub: 'Visa · Mastercard · Amex' },
-              { icon: Smartphone, label: 'Apple Pay', sub: 'One-touch' },
-              { icon: Smartphone, label: 'Google Pay', sub: 'One-touch' },
-              { icon: Landmark, label: t('pay.method.sepa'), sub: 'IBAN · Instant' },
-            ].map((m, i) => (
-              <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center hover:bg-white/10 transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center mx-auto mb-4">
-                  <m.icon className="w-6 h-6 text-white" />
-                </div>
-                <div className="font-semibold text-white text-sm">{m.label}</div>
-                <div className="text-xs text-ink-400 mt-1">{m.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Payment funnel */}
-          <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
-            <h3 className="font-display text-lg font-bold text-white mb-6">{t('psp.funnel')}</h3>
-            <div className="flex flex-wrap items-center gap-4">
-              {[
-                { stage: lang === 'fr' ? 'Initié' : 'Initiated', count: 1847 },
-                { stage: lang === 'fr' ? 'Contrôle conformité' : 'Compliance check', count: 1847 },
-                { stage: lang === 'fr' ? 'FX routé' : 'FX routed', count: 1839 },
-                { stage: lang === 'fr' ? 'Paiement envoyé' : 'Payout sent', count: 1832 },
-                { stage: lang === 'fr' ? 'Complété' : 'Completed', count: 1832 },
-              ].map((s, i, arr) => (
-                <div key={s.stage} className="flex items-center gap-4">
-                  <div>
-                    <div className="font-display text-xl font-bold text-accent-400">{s.count.toLocaleString()}</div>
-                    <div className="text-xs text-ink-400">{s.stage}</div>
-                    <div className="mt-1.5 h-1 rounded-full bg-white/10 overflow-hidden w-24">
-                      <div className="h-full rounded-full bg-accent-500" style={{ width: `${Math.round((s.count / arr[0].count) * 100)}%` }} />
-                    </div>
-                  </div>
-                  {i < arr.length - 1 && <Repeat className="w-4 h-4 text-ink-500 flex-shrink-0" />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-10 text-center">
-            <button onClick={() => navigate('auth')} className="btn-primary text-base px-8 py-3.5">
-              {t('psp.cta')} <ArrowRight className="w-4 h-4" />
-            </button>
-            <p className="mt-4 text-[11px] text-ink-400 flex items-center justify-center gap-2">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              {t('pay.poweredBy')}
-            </p>
-          </div>
-        </div>
-        </Reveal>
-      </section>
-
       {/* Corridors */}
       <section className="py-16 sm:py-20 bg-ink-50/60 border-y border-ink-100">
         <Reveal>
@@ -534,64 +437,6 @@ export function LandingPage() {
                 </span>
               </div>
             ))}
-          </div>
-        </div>
-        </Reveal>
-      </section>
-
-      {/* API */}
-      <section className="py-16 sm:py-20 bg-white">
-        <Reveal>
-        <div className="section-padding max-w-6xl mx-auto">
-          <div className="rounded-3xl bg-vanta-950 relative overflow-hidden p-8 lg:p-12">
-            <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-            <div className="absolute top-0 left-1/3 w-[500px] h-[300px] bg-vanta-500/15 blur-[120px]" />
-
-            <div className="relative grid lg:grid-cols-2 gap-12 items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-vanta-500/10 border border-vanta-500/20 text-vanta-300 text-sm font-medium mb-6">
-                  <Terminal className="w-4 h-4" />
-                  {t('apis.badge')}
-                </div>
-                <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white tracking-tight">
-                  {t('apis.title')}
-                </h2>
-                <p className="mt-4 text-ink-300 leading-relaxed">{t('apis.subtitle')}</p>
-                <button onClick={() => navigate('api')} className="btn-accent mt-8">
-                  {t('apis.cta')}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="rounded-xl bg-black/60 border border-white/10 overflow-hidden">
-                <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/10">
-                  <span className="w-3 h-3 rounded-full bg-danger-500/70" />
-                  <span className="w-3 h-3 rounded-full bg-warning-500/70" />
-                  <span className="w-3 h-3 rounded-full bg-success-500/70" />
-                  <span className="ml-3 text-xs text-ink-400 font-mono">POST /v1/quotes</span>
-                </div>
-                <pre className="p-5 text-sm font-mono leading-relaxed overflow-x-auto">
-                  <code>
-                    <span className="text-ink-500">$ </span>
-                    <span className="text-vanta-300">curl</span>
-                    <span className="text-ink-300"> https://api.vanta.global/v1/quotes \</span>
-                    {'\n'}
-                    <span className="text-ink-300">  -H </span>
-                    <span className="text-vanta-200">"Authorization: Bearer vnt_sk_..."</span>
-                    <span className="text-ink-300"> \</span>
-                    {'\n'}
-                    <span className="text-ink-300">  -H </span>
-                    <span className="text-vanta-200">"Idempotency-Key: req_9f2a"</span>
-                    <span className="text-ink-300"> \</span>
-                    {'\n'}
-                    <span className="text-ink-300">  -d </span>
-                    <span className="text-vanta-200">'{'{'}"from":"AED","to":"XAF",</span>
-                    {'\n'}
-                    <span className="text-vanta-200">        "amount":1000{'}'}'</span>
-                  </code>
-                </pre>
-              </div>
-            </div>
           </div>
         </div>
         </Reveal>
@@ -685,6 +530,135 @@ export function LandingPage() {
         </Reveal>
       </section>
 
+      {/* PSP — VantaPay rails */}
+      <section className="py-24 bg-vanta-950 relative overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-accent-500/10 blur-[120px]" />
+        <Reveal>
+        <div className="section-padding max-w-6xl mx-auto relative">
+          <div className="text-center max-w-2xl mx-auto">
+            <span className="inline-flex items-center gap-2 text-xs font-semibold text-accent-400 bg-accent-500/10 border border-accent-500/20 rounded-full px-3 py-1.5">
+              <Lock className="w-3.5 h-3.5" />
+              {t('psp.badge')}
+            </span>
+            <h2 className="mt-5 font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-white tracking-tight">
+              {t('psp.title')}
+            </h2>
+            <p className="mt-4 text-lg text-ink-300">{t('psp.subtitle')}</p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: CreditCard, label: t('pay.method.card'), sub: 'Visa · Mastercard · Amex' },
+              { icon: Smartphone, label: 'Apple Pay', sub: 'One-touch' },
+              { icon: Smartphone, label: 'Google Pay', sub: 'One-touch' },
+              { icon: Landmark, label: t('pay.method.sepa'), sub: 'IBAN · Instant' },
+            ].map((m, i) => (
+              <div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center hover:bg-white/10 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center mx-auto mb-4">
+                  <m.icon className="w-6 h-6 text-white" />
+                </div>
+                <div className="font-semibold text-white text-sm">{m.label}</div>
+                <div className="text-xs text-ink-400 mt-1">{m.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Payment funnel */}
+          <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
+            <h3 className="font-display text-lg font-bold text-white mb-6">{t('psp.funnel')}</h3>
+            <div className="flex flex-wrap items-center gap-4">
+              {[
+                { stage: lang === 'fr' ? 'Initié' : 'Initiated', count: 1847 },
+                { stage: lang === 'fr' ? 'Contrôle conformité' : 'Compliance check', count: 1847 },
+                { stage: lang === 'fr' ? 'FX routé' : 'FX routed', count: 1839 },
+                { stage: lang === 'fr' ? 'Paiement envoyé' : 'Payout sent', count: 1832 },
+                { stage: lang === 'fr' ? 'Complété' : 'Completed', count: 1832 },
+              ].map((s, i, arr) => (
+                <div key={s.stage} className="flex items-center gap-4">
+                  <div>
+                    <div className="font-display text-xl font-bold text-accent-400">{s.count.toLocaleString()}</div>
+                    <div className="text-xs text-ink-400">{s.stage}</div>
+                    <div className="mt-1.5 h-1 rounded-full bg-white/10 overflow-hidden w-24">
+                      <div className="h-full rounded-full bg-accent-500" style={{ width: `${Math.round((s.count / arr[0].count) * 100)}%` }} />
+                    </div>
+                  </div>
+                  {i < arr.length - 1 && <Repeat className="w-4 h-4 text-ink-500 flex-shrink-0" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-10 text-center">
+            <button onClick={() => navigate('auth')} className="btn-primary text-base px-8 py-3.5">
+              {t('psp.cta')} <ArrowRight className="w-4 h-4" />
+            </button>
+            <p className="mt-4 text-[11px] text-ink-400 flex items-center justify-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              {t('pay.poweredBy')}
+            </p>
+          </div>
+        </div>
+        </Reveal>
+      </section>
+
+      {/* API */}
+      <section className="py-16 sm:py-20 bg-white">
+        <Reveal>
+        <div className="section-padding max-w-6xl mx-auto">
+          <div className="rounded-3xl bg-vanta-950 relative overflow-hidden p-8 lg:p-12">
+            <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+            <div className="absolute top-0 left-1/3 w-[500px] h-[300px] bg-vanta-500/15 blur-[120px]" />
+
+            <div className="relative grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-vanta-500/10 border border-vanta-500/20 text-vanta-300 text-sm font-medium mb-6">
+                  <Terminal className="w-4 h-4" />
+                  {t('apis.badge')}
+                </div>
+                <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white tracking-tight">
+                  {t('apis.title')}
+                </h2>
+                <p className="mt-4 text-ink-300 leading-relaxed">{t('apis.subtitle')}</p>
+                <button onClick={() => navigate('api')} className="btn-accent mt-8">
+                  {t('apis.cta')}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="rounded-xl bg-black/60 border border-white/10 overflow-hidden">
+                <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/10">
+                  <span className="w-3 h-3 rounded-full bg-danger-500/70" />
+                  <span className="w-3 h-3 rounded-full bg-warning-500/70" />
+                  <span className="w-3 h-3 rounded-full bg-success-500/70" />
+                  <span className="ml-3 text-xs text-ink-400 font-mono">POST /v1/quotes</span>
+                </div>
+                <pre className="p-5 text-sm font-mono leading-relaxed overflow-x-auto">
+                  <code>
+                    <span className="text-ink-500">$ </span>
+                    <span className="text-vanta-300">curl</span>
+                    <span className="text-ink-300"> https://api.vanta.global/v1/quotes \</span>
+                    {'\n'}
+                    <span className="text-ink-300">  -H </span>
+                    <span className="text-vanta-200">"Authorization: Bearer vnt_sk_..."</span>
+                    <span className="text-ink-300"> \</span>
+                    {'\n'}
+                    <span className="text-ink-300">  -H </span>
+                    <span className="text-vanta-200">"Idempotency-Key: req_9f2a"</span>
+                    <span className="text-ink-300"> \</span>
+                    {'\n'}
+                    <span className="text-ink-300">  -d </span>
+                    <span className="text-vanta-200">'{'{'}"from":"AED","to":"XAF",</span>
+                    {'\n'}
+                    <span className="text-vanta-200">        "amount":1000{'}'}'</span>
+                  </code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        </Reveal>
+      </section>
+
       {/* Security */}
       <section className="py-16 sm:py-20 bg-ink-50/60">
         <Reveal>
@@ -750,6 +724,32 @@ export function LandingPage() {
           </div>
         </div>
         </Reveal>
+      </section>
+
+      {/* Live rate calculator */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="section-padding max-w-6xl mx-auto">
+          <Reveal className="text-center max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-vanta-50 border border-vanta-100 text-vanta-700 text-sm font-medium">
+              <span className="w-2 h-2 rounded-full bg-vanta-500 animate-pulse" />
+              {t('showcase.badge')}
+            </div>
+            <h2 className="mt-5 font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-black tracking-tight">
+              {t('showcase.title')}
+            </h2>
+            <p className="mt-4 text-lg text-ink-500">{t('showcase.subtitle')}</p>
+          </Reveal>
+          <Reveal delay={150} className="mt-12 max-w-md mx-auto">
+            <Converter />
+            <button
+              onClick={() => navigate('auth')}
+              className="mt-6 mx-auto flex items-center gap-2 text-vanta-700 font-semibold text-sm hover:gap-3 transition-all"
+            >
+              {t('showcase.cta')}
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </Reveal>
+        </div>
       </section>
 
       {/* CTA */}

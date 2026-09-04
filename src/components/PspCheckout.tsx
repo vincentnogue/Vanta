@@ -67,7 +67,12 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
 
   const brand = useMemo(() => detectBrand(card.number.replace(/\s/g, '')), [card.number]);
   const currentUserEmail = getCurrentUser()?.email;
-  const amountNum = parseFloat(amount);
+  const amountNum = parseFloat(amount) || 0;
+  // Transparent processing fee, shown up front — real Stripe card-processing
+  // economics (2.9% + a small fixed fee), added on top of what the user
+  // wants credited, never hidden in the total the way it would be if we
+  // just silently deducted it from their balance.
+  const processingFee = amountNum > 0 ? Math.round((amountNum * 0.029 + 0.3) * 100) / 100 : 0;
   const usingSavedCard = method === 'card' && selectedCardId !== 'new';
   const useRealStripe = isStripeConfigured() && method === 'card' && !usingSavedCard;
 
@@ -107,7 +112,7 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
       if (!cardElement) return;
       setPhase('processing');
       try {
-        const { clientSecret } = await createPaymentIntent(amountNum, currency);
+        const { clientSecret } = await createPaymentIntent(amountNum + processingFee, currency, amountNum);
         const result = await stripe.confirmCardPayment(clientSecret, {
           payment_method: { card: cardElement },
         });
@@ -431,6 +436,25 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
             </div>
           )}
 
+          {/* Order summary — Stripe/Paddle-style fee transparency before charging */}
+          {amountNum > 0 && (
+            <div className="rounded-xl border border-ink-200 bg-ink-50/40 p-4 space-y-2 text-sm">
+              <div className="flex items-center justify-between text-ink-500">
+                <span>{t('pay.summary.amount')}</span>
+                <span className="font-medium text-ink-800 tabular-nums">{formatCurrency(amountNum, currency)}</span>
+              </div>
+              <div className="flex items-center justify-between text-ink-500">
+                <span>{t('pay.summary.fee')}</span>
+                <span className="font-medium text-ink-800 tabular-nums">{formatCurrency(processingFee, currency)}</span>
+              </div>
+              <div className="h-px bg-ink-200" />
+              <div className="flex items-center justify-between font-display font-bold text-black">
+                <span>{t('pay.summary.total')}</span>
+                <span className="tabular-nums">{formatCurrency(amountNum + processingFee, currency)}</span>
+              </div>
+            </div>
+          )}
+
           {/* Submit */}
           <button
             type="submit"
@@ -442,7 +466,7 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
             ) : phase === 'success' ? (
               <><Check className="w-5 h-5" /> {t('pay.success')}</>
             ) : (
-              <><Lock className="w-4 h-4" /> {t('pay.pay')} {cur?.flag} {formatCurrency(parseFloat(amount) || 0, currency)}</>
+              <><Lock className="w-4 h-4" /> {t('pay.pay')} {cur?.flag} {formatCurrency(amountNum > 0 ? amountNum + processingFee : 0, currency)}</>
             )}
           </button>
 

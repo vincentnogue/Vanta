@@ -66,6 +66,7 @@ export type TranslationKey =
   | 'pay.secure' | 'pay.title' | 'pay.chooseAmount' | 'pay.amount' | 'pay.currency' | 'pay.method' | 'pay.method.card' | 'pay.method.sepa' | 'pay.demoMode'
   | 'pay.cardNumber' | 'pay.expiry' | 'pay.cvc' | 'pay.cardError' | 'pay.sepaNote' | 'pay.expressNote'
   | 'pay.processing' | 'pay.success' | 'pay.pay' | 'pay.poweredBy' | 'pay.poweredByStripe' | 'pay.newCard' | 'pay.saveCard' | 'pay.receiptTo'
+  | 'pay.summary.amount' | 'pay.summary.fee' | 'pay.summary.total'
   | 'nav.superadmin' | 'sa.title'
   | 'sa.nav.overview' | 'sa.nav.tenants' | 'sa.nav.transactions' | 'sa.nav.staff' | 'sa.nav.fraud' | 'sa.nav.audit' | 'sa.nav.settings'
   | 'sa.ov.liveFeed' | 'sa.ov.volumeToday' | 'sa.ov.activeTenants' | 'sa.ov.activeUsers' | 'sa.ov.tps' | 'sa.ov.uptime' | 'sa.ov.alerts' | 'sa.ov.volumeByDay' | 'sa.ov.tenantsByPlan'
@@ -562,6 +563,9 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.poweredBy': 'Powered by VantaPay Rails · PCI-DSS ready integration',
     'pay.poweredByStripe': 'Powered by Stripe',
     'pay.receiptTo': 'Receipt will be sent to',
+    'pay.summary.amount': 'Amount to add',
+    'pay.summary.fee': 'Processing fee',
+    'pay.summary.total': 'Total charged to card',
     'pay.newCard': 'Use a new card',
     'pay.saveCard': 'Save this card for future payments',
 
@@ -1161,6 +1165,9 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.poweredBy': 'Propulsé par VantaPay Rails · intégration prête PCI-DSS',
     'pay.poweredByStripe': 'Propulsé par Stripe',
     'pay.receiptTo': 'Le reçu sera envoyé à',
+    'pay.summary.amount': 'Montant à ajouter',
+    'pay.summary.fee': 'Frais de traitement',
+    'pay.summary.total': 'Total facturé à la carte',
     'pay.newCard': 'Utiliser une nouvelle carte',
     'pay.saveCard': 'Enregistrer cette carte pour les prochains paiements',
 
