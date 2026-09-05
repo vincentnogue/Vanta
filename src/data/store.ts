@@ -94,6 +94,7 @@ function mapPaymentMethod(row: any): PaymentMethod {
     expYear: String(row.exp_year).slice(-2).padStart(2, '0'),
     holder: row.holder_name,
     isDefault: row.is_default,
+    providerRef: row.provider === 'stripe' ? row.provider_ref ?? undefined : undefined,
   };
 }
 
@@ -188,7 +189,7 @@ export function addRecipient(recipient: Recipient) {
   }).then();
 }
 
-export function addPaymentMethod(method: PaymentMethod) {
+export function addPaymentMethod(method: PaymentMethod, providerRef?: string) {
   const uid = currentUserId;
   const isFirst = state.paymentMethods.length === 0;
   const shouldBeDefault = method.isDefault || isFirst;
@@ -207,6 +208,7 @@ export function addPaymentMethod(method: PaymentMethod) {
       id: finalMethod.id, user_id: uid, brand: finalMethod.brand, last4: finalMethod.last4,
       exp_month: Number(finalMethod.expMonth), exp_year: 2000 + Number(finalMethod.expYear),
       holder_name: finalMethod.holder, is_default: finalMethod.isDefault,
+      provider: providerRef ? 'stripe' : 'demo', provider_ref: providerRef ?? null,
     });
   };
   persist();

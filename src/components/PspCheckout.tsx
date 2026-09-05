@@ -5,7 +5,7 @@ import { getCurrencyByCode, formatCurrency } from '@/data/mockData';
 import { detectBrand, formatCardNumber, formatExpiry } from '@/data/cardUtils';
 import { CardBrandMark, ApplePayMark, GooglePayMark } from '@/components/CardBrandMark';
 import { addMoney, addPaymentMethod, refreshStore, useStore } from '@/data/store';
-import { createPaymentIntent } from '@/data/payments';
+import { createPaymentIntent, chargeSavedCard, confirmSavedCard } from '@/data/payments';
 import { getStripe, isStripeConfigured } from '@/lib/stripe';
 import { getCurrentUser } from '@/data/auth';
 import { Logo } from '@/components/Logo';
@@ -74,7 +74,9 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
   // just silently deducted it from their balance.
   const processingFee = amountNum > 0 ? Math.round((amountNum * 0.029 + 0.3) * 100) / 100 : 0;
   const usingSavedCard = method === 'card' && selectedCardId !== 'new';
+  const selectedCard = paymentMethods.find((p) => p.id === selectedCardId);
   const useRealStripe = isStripeConfigured() && method === 'card' && !usingSavedCard;
+  const useRealStripeSavedCard = isStripeConfigured() && usingSavedCard && Boolean(selectedCard?.providerRef);
 
   useEffect(() => {
     if (open) {
@@ -105,6 +107,41 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
     if (!amountNum || amountNum <= 0 || phase !== 'form') return;
     setStripeErrorMsg(null);
 
+    // Real Stripe path: charging a saved card (off/on-session reuse).
+    if (useRealStripeSavedCard && selectedCard?.providerRef) {
+      setPhase('processing');
+      try {
+        const { clientSecret, status } = await chargeSavedCard(
+          amountNum + processingFee,
+          currency,
+          amountNum,
+          selectedCard.providerRef,
+        );
+        if (status === 'requires_action' && stripe) {
+          const result = await stripe.confirmCardPayment(clientSecret);
+          if (result.error) {
+            setStripeErrorMsg(result.error.message ?? t('pay.cardError'));
+            setPhase('form');
+            return;
+          }
+        } else if (status !== 'succeeded') {
+          setStripeErrorMsg(t('pay.cardError'));
+          setPhase('form');
+          return;
+        }
+        setPhase('success');
+        setTimeout(() => {
+          refreshStore();
+          onClose();
+          setAmount('');
+        }, 2200);
+      } catch (err) {
+        setStripeErrorMsg(err instanceof Error ? err.message : String(err));
+        setPhase('form');
+      }
+      return;
+    }
+
     // Real Stripe path: new card, key configured.
     if (useRealStripe) {
       if (!stripe || !elements) return;
@@ -112,7 +149,7 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
       if (!cardElement) return;
       setPhase('processing');
       try {
-        const { clientSecret } = await createPaymentIntent(amountNum + processingFee, currency, amountNum);
+        const { clientSecret } = await createPaymentIntent(amountNum + processingFee, currency, amountNum, saveCard);
         const result = await stripe.confirmCardPayment(clientSecret, {
           payment_method: { card: cardElement },
         });
@@ -122,6 +159,29 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
           return;
         }
         if (result.paymentIntent?.status === 'succeeded') {
+          // If the box was checked, the card was attached to the customer as
+          // a side effect of this payment (setup_future_usage) — fetch its
+          // real details now and save it for next time.
+          if (saveCard) {
+            try {
+              const confirmed = await confirmSavedCard({ paymentIntentId: result.paymentIntent.id });
+              addPaymentMethod(
+                {
+                  id: `pm_${Date.now()}`,
+                  brand: confirmed.brand as 'VISA' | 'MASTERCARD' | 'AMEX',
+                  last4: confirmed.last4,
+                  expMonth: String(confirmed.expMonth).padStart(2, '0'),
+                  expYear: String(confirmed.expYear).slice(-2),
+                  holder: '',
+                  isDefault: false,
+                },
+                confirmed.paymentMethodId,
+              );
+            } catch {
+              // Payment already succeeded — a failure to save the card for
+              // next time shouldn't block or roll back the top-up itself.
+            }
+          }
           setPhase('success');
           // The Stripe webhook — not this client — is what actually credits the
           // balance and writes the transaction. Give it a moment, then re-pull
@@ -458,7 +518,13 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
           {/* Submit */}
           <button
             type="submit"
-            disabled={phase !== 'form' || !amount || parseFloat(amount) <= 0 || (useRealStripe && (!stripe || !elements))}
+            disabled={
+              phase !== 'form' ||
+              !amount ||
+              parseFloat(amount) <= 0 ||
+              (useRealStripe && (!stripe || !elements)) ||
+              (useRealStripeSavedCard && !stripe)
+            }
             className="btn-primary w-full py-3.5 text-base"
           >
             {phase === 'processing' ? (

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useI18n } from '@/i18n/I18nContext';
 import { useRouter, type Route } from '@/router/RouterContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
@@ -6,9 +7,11 @@ import { PspCheckout } from '@/components/PspCheckout';
 import { CardBrandMark } from '@/components/CardBrandMark';
 import { formatCardNumber, formatExpiry, detectBrand } from '@/data/cardUtils';
 import { useStore, addPaymentMethod, removePaymentMethod, setDefaultPaymentMethod } from '@/data/store';
+import { createSetupIntent, confirmSavedCard } from '@/data/payments';
+import { getStripe, isStripeConfigured } from '@/lib/stripe';
 import {
   Home, Send, Users, Activity, Wallet, CreditCard, ArrowLeftRight, Shield, Settings,
-  Plus, Star, Trash2, X, Check,
+  Plus, Star, Trash2, X, Check, AlertCircle,
 } from 'lucide-react';
 
 export function CardsPage() {
@@ -110,6 +113,105 @@ export function CardsPage() {
 }
 
 function AddCardModal({ onClose }: { onClose: () => void }) {
+  if (isStripeConfigured()) {
+    return (
+      <Elements stripe={getStripe()}>
+        <AddCardModalStripe onClose={onClose} />
+      </Elements>
+    );
+  }
+  return <AddCardModalDemo onClose={onClose} />;
+}
+
+const cardElementStyle = {
+  style: {
+    base: { fontSize: '14px', fontFamily: 'Poppins, system-ui, sans-serif', color: '#0f172a', '::placeholder': { color: '#94a3b8' } },
+    invalid: { color: '#dc2626' },
+  },
+};
+
+function AddCardModalStripe({ onClose }: { onClose: () => void }) {
+  const { t } = useI18n();
+  const stripe = useStripe();
+  const elements = useElements();
+  const [holder, setHolder] = useState('');
+  const [makeDefault, setMakeDefault] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cardFocused, setCardFocused] = useState(false);
+
+  const submit = async () => {
+    if (!stripe || !elements || processing || !holder.trim()) return;
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) return;
+    setError(null);
+    setProcessing(true);
+    try {
+      const { clientSecret, setupIntentId } = await createSetupIntent();
+      const result = await stripe.confirmCardSetup(clientSecret, {
+        payment_method: { card: cardElement, billing_details: { name: holder.trim() } },
+      });
+      if (result.error) {
+        setError(result.error.message ?? t('pay.cardError'));
+        setProcessing(false);
+        return;
+      }
+      const confirmed = await confirmSavedCard(setupIntentId);
+      addPaymentMethod({
+        id: `pm_${Date.now()}`,
+        brand: confirmed.brand as 'VISA' | 'MASTERCARD' | 'AMEX',
+        last4: confirmed.last4,
+        expMonth: String(confirmed.expMonth).padStart(2, '0'),
+        expYear: String(confirmed.expYear).slice(-2),
+        holder: holder.trim(),
+        isDefault: makeDefault,
+      }, confirmed.paymentMethodId);
+      setProcessing(false);
+      setDone(true);
+      setTimeout(onClose, 900);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <CardModalShell onClose={onClose} done={done}>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('cards.holder')}</label>
+          <input value={holder} onChange={(e) => setHolder(e.target.value)} placeholder="John Doe" className="input text-sm" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('pay.cardNumber')}</label>
+          <div className={`rounded-lg border bg-white px-3.5 py-3 transition-all ${cardFocused ? 'border-vanta-500 ring-2 ring-vanta-500/20' : 'border-ink-200'}`}>
+            <CardElement options={cardElementStyle} onFocus={() => setCardFocused(true)} onBlur={() => setCardFocused(false)} onChange={() => setError(null)} />
+          </div>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-ink-600 cursor-pointer">
+          <input type="checkbox" checked={makeDefault} onChange={(e) => setMakeDefault(e.target.checked)} className="w-4 h-4 rounded border-ink-300 text-vanta-600 focus:ring-vanta-500" />
+          {t('cards.setDefault')}
+        </label>
+        {error && (
+          <p className="text-xs text-danger-600 font-medium flex items-center gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {error}
+          </p>
+        )}
+        <button
+          onClick={submit}
+          disabled={!holder.trim() || processing || !stripe}
+          className="btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {processing ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Plus className="w-4 h-4" />}
+          {t('cards.add')}
+        </button>
+      </div>
+    </CardModalShell>
+  );
+}
+
+function AddCardModalDemo({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
   const [holder, setHolder] = useState('');
   const [number, setNumber] = useState('');
@@ -144,6 +246,55 @@ function AddCardModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
+    <CardModalShell onClose={onClose} done={done}>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('cards.holder')}</label>
+          <input value={holder} onChange={(e) => setHolder(e.target.value)} placeholder="John Doe" className="input text-sm" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('pay.cardNumber')}</label>
+          <div className="relative">
+            <input
+              value={number}
+              onChange={(e) => setNumber(formatCardNumber(e.target.value))}
+              placeholder="1234 5678 9012 3456"
+              inputMode="numeric"
+              className="input text-sm font-mono pr-16"
+            />
+            {digits.length >= 2 && (
+              <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                <CardBrandMark brand={brand} className="h-5 w-8 rounded" />
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('pay.expiry')}</label>
+            <input value={expiry} onChange={(e) => setExpiry(formatExpiry(e.target.value))} placeholder="MM/YY" inputMode="numeric" className="input text-sm font-mono" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('pay.cvc')}</label>
+            <input value={cvc} onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="CVC" inputMode="numeric" className="input text-sm font-mono" />
+          </div>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-ink-600 cursor-pointer">
+          <input type="checkbox" checked={makeDefault} onChange={(e) => setMakeDefault(e.target.checked)} className="w-4 h-4 rounded border-ink-300 text-vanta-600 focus:ring-vanta-500" />
+          {t('cards.setDefault')}
+        </label>
+        <button onClick={submit} disabled={!valid || processing} className="btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+          {processing ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <Plus className="w-4 h-4" />}
+          {t('cards.add')}
+        </button>
+      </div>
+    </CardModalShell>
+  );
+}
+
+function CardModalShell({ onClose, done, children }: { onClose: () => void; done: boolean; children: React.ReactNode }) {
+  const { t } = useI18n();
+  return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-vanta-950/60 backdrop-blur-sm" onClick={onClose}>
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden animate-fade-up" onClick={(e) => e.stopPropagation()}>
         <div className="bg-gradient-to-br from-vanta-800 to-vanta-950 px-6 py-5 text-white">
@@ -153,6 +304,7 @@ function AddCardModal({ onClose }: { onClose: () => void }) {
               <X className="w-5 h-5" />
             </button>
           </div>
+          {!isStripeConfigured() && <span className="badge bg-white/10 text-ink-200 text-[9px] py-0.5 mt-2">{t('pay.demoMode')}</span>}
         </div>
 
         {done ? (
@@ -163,77 +315,7 @@ function AddCardModal({ onClose }: { onClose: () => void }) {
             <p className="font-semibold text-ink-900">{t('cards.added')}</p>
           </div>
         ) : (
-          <div className="p-6 space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('cards.holder')}</label>
-              <input
-                value={holder}
-                onChange={(e) => setHolder(e.target.value)}
-                placeholder="John Doe"
-                className="input text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('pay.cardNumber')}</label>
-              <div className="relative">
-                <input
-                  value={number}
-                  onChange={(e) => setNumber(formatCardNumber(e.target.value))}
-                  placeholder="1234 5678 9012 3456"
-                  inputMode="numeric"
-                  className="input text-sm font-mono pr-16"
-                />
-                {digits.length >= 2 && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <CardBrandMark brand={brand} className="h-5 w-8 rounded" />
-                  </span>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('pay.expiry')}</label>
-                <input
-                  value={expiry}
-                  onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                  placeholder="MM/YY"
-                  inputMode="numeric"
-                  className="input text-sm font-mono"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-ink-500 mb-1.5">{t('pay.cvc')}</label>
-                <input
-                  value={cvc}
-                  onChange={(e) => setCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                  placeholder="CVC"
-                  inputMode="numeric"
-                  className="input text-sm font-mono"
-                />
-              </div>
-            </div>
-            <label className="flex items-center gap-2 text-sm text-ink-600 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={makeDefault}
-                onChange={(e) => setMakeDefault(e.target.checked)}
-                className="w-4 h-4 rounded border-ink-300 text-vanta-600 focus:ring-vanta-500"
-              />
-              {t('cards.setDefault')}
-            </label>
-            <button
-              onClick={submit}
-              disabled={!valid || processing}
-              className="btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {processing ? (
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
-              {t('cards.add')}
-            </button>
-          </div>
+          <div className="p-6">{children}</div>
         )}
       </div>
     </div>

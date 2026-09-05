@@ -65,6 +65,8 @@ export type PaymentMethod = {
   expYear: string;
   holder: string;
   isDefault: boolean;
+  /** Stripe payment_method id (pm_...) when this card is real, not demo. */
+  providerRef?: string;
 };
 
 export const currencies: Currency[] = [
