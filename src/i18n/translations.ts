@@ -67,6 +67,11 @@ export type TranslationKey =
   | 'pay.cardNumber' | 'pay.expiry' | 'pay.cvc' | 'pay.cardError' | 'pay.sepaNote' | 'pay.expressNote'
   | 'pay.processing' | 'pay.success' | 'pay.pay' | 'pay.poweredBy' | 'pay.poweredByStripe' | 'pay.newCard' | 'pay.saveCard' | 'pay.receiptTo'
   | 'pay.summary.amount' | 'pay.summary.fee' | 'pay.summary.total'
+  | 'pricing.badge' | 'pricing.title' | 'pricing.subtitle'
+  | 'pricing.card.title' | 'pricing.card.rate' | 'pricing.card.desc'
+  | 'pricing.bank.title' | 'pricing.bank.rate' | 'pricing.bank.desc'
+  | 'pricing.payout.title' | 'pricing.payout.rate' | 'pricing.payout.desc'
+  | 'pricing.note'
   | 'nav.superadmin' | 'sa.title'
   | 'sa.nav.overview' | 'sa.nav.tenants' | 'sa.nav.transactions' | 'sa.nav.staff' | 'sa.nav.fraud' | 'sa.nav.audit' | 'sa.nav.settings'
   | 'sa.ov.liveFeed' | 'sa.ov.volumeToday' | 'sa.ov.activeTenants' | 'sa.ov.activeUsers' | 'sa.ov.tps' | 'sa.ov.uptime' | 'sa.ov.alerts' | 'sa.ov.volumeByDay' | 'sa.ov.tenantsByPlan'
@@ -566,6 +571,19 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.summary.amount': 'Amount to add',
     'pay.summary.fee': 'Processing fee',
     'pay.summary.total': 'Total charged to card',
+    'pricing.badge': 'Simple, transparent pricing',
+    'pricing.title': 'One rate. No surprises.',
+    'pricing.subtitle': 'The fee is shown before you confirm, every time — never buried in the exchange rate.',
+    'pricing.card.title': 'Card top-ups',
+    'pricing.card.rate': '2.9% + $0.30',
+    'pricing.card.desc': 'Standard card processing rate, identical to what Stripe itself charges — we don\'t mark it up.',
+    'pricing.bank.title': 'Bank transfer / SEPA',
+    'pricing.bank.rate': '0.8%',
+    'pricing.bank.desc': 'The cheapest way to fund your balance for larger amounts, settles in 1–2 business days.',
+    'pricing.payout.title': 'Mobile money & bank payout',
+    'pricing.payout.rate': '~1.0%',
+    'pricing.payout.desc': 'Sending out to M-Pesa, MTN Momo, Orange Money, or a local bank account across Africa.',
+    'pricing.note': 'No monthly fees, no minimum balance, no charge for holding money in your account.',
     'pay.newCard': 'Use a new card',
     'pay.saveCard': 'Save this card for future payments',
 
@@ -1168,6 +1186,19 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pay.summary.amount': 'Montant à ajouter',
     'pay.summary.fee': 'Frais de traitement',
     'pay.summary.total': 'Total facturé à la carte',
+    'pricing.badge': 'Tarification simple et transparente',
+    'pricing.title': 'Un seul taux. Aucune surprise.',
+    'pricing.subtitle': 'Les frais sont affichés avant confirmation, à chaque fois — jamais cachés dans le taux de change.',
+    'pricing.card.title': 'Dépôt par carte',
+    'pricing.card.rate': '2,9 % + 0,30',
+    'pricing.card.desc': 'Le tarif standard de traitement carte, identique à celui de Stripe — on ne rajoute pas de marge dessus.',
+    'pricing.bank.title': 'Virement bancaire / SEPA',
+    'pricing.bank.rate': '0,8 %',
+    'pricing.bank.desc': 'La façon la moins chère d\'alimenter votre solde pour de gros montants, sous 1 à 2 jours ouvrés.',
+    'pricing.payout.title': 'Décaissement mobile money & bancaire',
+    'pricing.payout.rate': '~1,0 %',
+    'pricing.payout.desc': 'Envoi vers M-Pesa, MTN Momo, Orange Money, ou un compte bancaire local en Afrique.',
+    'pricing.note': 'Aucun frais mensuel, aucun solde minimum, rien pour la simple détention d\'argent sur le compte.',
     'pay.newCard': 'Utiliser une nouvelle carte',
     'pay.saveCard': 'Enregistrer cette carte pour les prochains paiements',
 

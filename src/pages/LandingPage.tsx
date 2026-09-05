@@ -726,6 +726,42 @@ export function LandingPage() {
         </Reveal>
       </section>
 
+      {/* Pricing — transparent fees, matching the checkout's own summary */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="section-padding max-w-5xl mx-auto">
+          <Reveal className="text-center max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-vanta-50 border border-vanta-100 text-vanta-700 text-sm font-medium">
+              <CreditCard className="w-4 h-4" />
+              {t('pricing.badge')}
+            </div>
+            <h2 className="mt-5 font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-black tracking-tight">
+              {t('pricing.title')}
+            </h2>
+            <p className="mt-4 text-lg text-ink-500">{t('pricing.subtitle')}</p>
+          </Reveal>
+
+          <Reveal delay={150} className="mt-12 grid sm:grid-cols-3 gap-5">
+            {[
+              { icon: CreditCard, title: t('pricing.card.title'), rate: t('pricing.card.rate'), desc: t('pricing.card.desc') },
+              { icon: Landmark, title: t('pricing.bank.title'), rate: t('pricing.bank.rate'), desc: t('pricing.bank.desc') },
+              { icon: ArrowUpFromLine, title: t('pricing.payout.title'), rate: t('pricing.payout.rate'), desc: t('pricing.payout.desc') },
+            ].map((p, i) => (
+              <div key={i} className="card p-6 flex flex-col">
+                <p.icon className="w-6 h-6 text-vanta-600 mb-4" />
+                <div className="font-display text-3xl font-bold text-black tabular-nums">{p.rate}</div>
+                <div className="mt-1 font-semibold text-ink-800 text-sm">{p.title}</div>
+                <p className="mt-2.5 text-sm text-ink-500 leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </Reveal>
+
+          <Reveal delay={250} className="mt-8 flex items-center justify-center gap-2 text-sm text-ink-500">
+            <CheckCircle2 className="w-4 h-4 text-vanta-600 shrink-0" />
+            {t('pricing.note')}
+          </Reveal>
+        </div>
+      </section>
+
       {/* Live rate calculator */}
       <section className="py-16 sm:py-24 bg-white">
         <div className="section-padding max-w-6xl mx-auto">
