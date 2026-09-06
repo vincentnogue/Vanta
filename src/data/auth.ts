@@ -12,6 +12,8 @@ export type User = {
   role: UserRole;
   kycStatus: KycStatus;
   accountType: AccountType;
+  phone: string | null;
+  country: string | null;
 };
 
 type AuthState = {
@@ -53,7 +55,7 @@ export function onAuthChange(listener: () => void): () => void {
 async function loadProfile(userId: string, fallbackEmail: string): Promise<User> {
   const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (!data) {
-    return { id: userId, name: fallbackEmail.split('@')[0], email: fallbackEmail, role: 'customer', kycStatus: 'unverified', accountType: 'personal' };
+    return { id: userId, name: fallbackEmail.split('@')[0], email: fallbackEmail, role: 'customer', kycStatus: 'unverified', accountType: 'personal', phone: null, country: null };
   }
   return {
     id: data.id,
@@ -62,6 +64,8 @@ async function loadProfile(userId: string, fallbackEmail: string): Promise<User>
     role: data.role as UserRole,
     kycStatus: data.kyc_status as KycStatus,
     accountType: data.account_type as AccountType,
+    phone: data.phone ?? null,
+    country: data.country ?? null,
   };
 }
 
@@ -152,6 +156,18 @@ export async function approveKyc() {
     .eq('user_id', state.user.id)
     .eq('status', 'pending');
   state = { ...state, user: { ...state.user, kycStatus: 'verified' } };
+  emit();
+}
+
+export async function updateProfile(fields: { fullName?: string; phone?: string; country?: string }) {
+  if (!state.user) return;
+  const patch: Record<string, string> = {};
+  if (fields.fullName !== undefined) patch.full_name = fields.fullName;
+  if (fields.phone !== undefined) patch.phone = fields.phone;
+  if (fields.country !== undefined) patch.country = fields.country;
+  const { error } = await supabase.from('profiles').update(patch).eq('id', state.user.id);
+  if (error) throw error;
+  state = { ...state, user: { ...state.user, name: fields.fullName ?? state.user.name } };
   emit();
 }
 

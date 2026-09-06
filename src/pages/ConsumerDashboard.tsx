@@ -13,7 +13,7 @@ import {
   type Transaction, type PayoutMethod,
 } from '@/data/mockData';
 import { useStore, createTransfer, addRecipient, exchangeMoney, nextTxId } from '@/data/store';
-import { useAuth } from '@/data/auth';
+import { useAuth, updateProfile } from '@/data/auth';
 import { StatusBadge } from '@/components/StatusBadge';
 import { PspCheckout } from '@/components/PspCheckout';
 import { CardsPage } from './CardsPage';
@@ -1067,38 +1067,28 @@ function SecurityPage() {
 }
 
 // --- Settings Page ---
-const PROFILE_STORAGE = 'vanta-profile-v1';
-
 type ProfilePrefs = {
-  name: string;
-  phone: string;
   notifs: { email: boolean; sms: boolean; push: boolean; marketing: boolean };
 };
-
-function loadProfile(defaultName: string): ProfilePrefs {
-  const fallback: ProfilePrefs = {
-    name: defaultName,
-    phone: '+971 50 123 4567',
-    notifs: { email: true, sms: false, push: true, marketing: false },
-  };
-  try {
-    const raw = localStorage.getItem(PROFILE_STORAGE);
-    if (raw) return { ...fallback, ...(JSON.parse(raw) as Partial<ProfilePrefs>) };
-  } catch {
-    // corrupted storage — fall back to defaults
-  }
-  return fallback;
-}
 
 function SettingsPage() {
   const { t, lang, setLang } = useI18n();
   const { user } = useAuth();
   const kycVerified = user?.kycStatus === 'verified';
-  const [profile] = useState(() => loadProfile(user?.name ?? 'Vincent Nogue'));
-  const [name, setName] = useState(profile.name);
-  const [phone, setPhone] = useState(profile.phone);
+  const [name, setName] = useState(user?.name ?? '');
+  const [phone, setPhone] = useState(user?.phone ?? '');
+  const [country, setCountry] = useState(user?.country ?? 'AE');
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [notifs, setNotifs] = useState(profile.notifs);
+  const [notifs, setNotifs] = useState(() => {
+    try {
+      const raw = localStorage.getItem('vanta-notif-prefs-v1');
+      if (raw) return JSON.parse(raw) as ProfilePrefs['notifs'];
+    } catch {
+      // ignore corrupted local preference
+    }
+    return { email: true, sms: false, push: true, marketing: false };
+  });
 
   const navItems = [
     { route: 'consumer' as Route, label: t('dash.nav.home'), icon: Home },
@@ -1119,15 +1109,21 @@ function SettingsPage() {
     { key: 'marketing' as const, label: t('set.marketing') },
   ];
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      localStorage.setItem(PROFILE_STORAGE, JSON.stringify({ name, phone, notifs }));
-    } catch {
-      // storage unavailable — keep in-memory state
+      await updateProfile({ fullName: name, phone, country });
+      try {
+        localStorage.setItem('vanta-notif-prefs-v1', JSON.stringify(notifs));
+      } catch {
+        // notification preferences are a nice-to-have, not critical if storage is unavailable
+      }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
     }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -1143,18 +1139,18 @@ function SettingsPage() {
           </div>
           <div>
             <label className="block text-sm font-semibold text-ink-600 mb-1.5">{t('set.phone')}</label>
-            <input value={phone} onChange={(e) => setPhone(e.target.value)} className="input" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+971 50 123 4567" className="input" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-ink-600 mb-1.5">{t('set.country')}</label>
-            <select className="input" defaultValue="AE">
+            <select value={country} onChange={(e) => setCountry(e.target.value)} className="input">
               {allCountries.filter((c) => c.active).map((c) => (
                 <option key={c.code} value={c.code}>{c.flag} {lang === 'fr' ? c.nameFr : c.name}</option>
               ))}
             </select>
           </div>
-          <button type="submit" className="btn-primary">
-            {saved ? <><Check className="w-4 h-4" /> {t('set.saved')}</> : t('common.save')}
+          <button type="submit" disabled={saving} className="btn-primary disabled:opacity-60">
+            {saving ? <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : saved ? <><Check className="w-4 h-4" /> {t('set.saved')}</> : t('common.save')}
           </button>
         </form>
 
