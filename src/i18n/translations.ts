@@ -53,6 +53,7 @@ export type TranslationKey =
   | 'corr.title' | 'corr.subtitle' | 'corr.origin' | 'corr.destination' | 'corr.fee' | 'corr.delivery' | 'corr.speed'
   | 'apis.title' | 'apis.subtitle' | 'apis.cta' | 'apis.badge'
   | 'admin.nav.overview' | 'admin.nav.transactions' | 'admin.nav.customers' | 'admin.nav.compliance' | 'admin.nav.providers' | 'admin.nav.treasury' | 'admin.nav.reconciliation' | 'admin.nav.support'
+  | 'admin.customers.type' | 'admin.customers.txCount' | 'admin.noCustomers' | 'admin.noPendingKyc'
   | 'admin.ov.volume' | 'admin.ov.transactions' | 'admin.ov.success' | 'admin.ov.revenue' | 'admin.ov.fx' | 'admin.ov.compliance' | 'admin.ov.fraud' | 'admin.ov.liquidity'
   | 'admin.prov.title' | 'admin.prov.success' | 'admin.prov.latency' | 'admin.prov.cost' | 'admin.prov.status' | 'admin.prov.online' | 'admin.prov.degraded'
   | 'admin.comp.title' | 'admin.comp.queue' | 'admin.comp.review' | 'admin.comp.approve' | 'admin.comp.flag'
@@ -470,6 +471,10 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'admin.nav.overview': 'Overview',
     'admin.nav.transactions': 'Transactions',
     'admin.nav.customers': 'Customers',
+    'admin.customers.type': 'Account type',
+    'admin.customers.txCount': 'Transactions',
+    'admin.noCustomers': 'No customers yet.',
+    'admin.noPendingKyc': 'No KYC submissions waiting for review.',
     'admin.nav.compliance': 'Compliance',
     'admin.nav.providers': 'Providers',
     'admin.nav.treasury': 'Treasury',
@@ -1085,6 +1090,10 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'admin.nav.overview': 'Aperçu',
     'admin.nav.transactions': 'Transactions',
     'admin.nav.customers': 'Clients',
+    'admin.customers.type': 'Type de compte',
+    'admin.customers.txCount': 'Transactions',
+    'admin.noCustomers': 'Aucun client pour le moment.',
+    'admin.noPendingKyc': 'Aucun dossier KYC en attente de vérification.',
     'admin.nav.compliance': 'Conformité',
     'admin.nav.providers': 'Fournisseurs',
     'admin.nav.treasury': 'Trésorerie',

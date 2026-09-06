@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n/I18nContext';
 import { type Route } from '@/router/RouterContext';
 import {
   LayoutDashboard, ArrowLeftRight, Users, ShieldCheck, Network, Vault,
-  FileCheck, LifeBuoy, TrendingUp, AlertTriangle, DollarSign, Activity, Check, Flag,
+  FileCheck, LifeBuoy, TrendingUp, AlertTriangle, DollarSign, Activity, Check, Flag, X, Loader2,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { StatusBadge } from '@/components/StatusBadge';
 import { formatCurrency } from '@/data/mockData';
 import { useStore } from '@/data/store';
+import { fetchCustomers, fetchPendingKyc, adminApproveKyc, adminRejectKyc, type AdminCustomer, type AdminKycCase } from '@/data/admin';
 
 type Tab = 'overview' | 'transactions' | 'customers' | 'compliance' | 'providers' | 'treasury' | 'reconciliation' | 'support';
 
@@ -25,14 +26,6 @@ const complianceSeed: ComplianceCase[] = [
   { id: 'CMP-2026-0812', subject: 'Aminata Diallo', reason: 'Velocity check', risk: 'review', state: 'open' },
   { id: 'CMP-2026-0811', subject: 'Nexus Trading LLC', reason: 'KYB document expired', risk: 'pending', state: 'open' },
   { id: 'CMP-2026-0809', subject: 'Jean-Paul Mbarga', reason: 'High-risk corridor', risk: 'pending', state: 'open' },
-];
-
-const customers = [
-  { name: 'Aminata Diallo', country: '🇸🇳 Senegal', kyc: 'verified', volume: '18,400 AED', risk: 'Low' },
-  { name: 'Nexus Trading LLC', country: '🇦🇪 UAE', kyc: 'verified', volume: '412,000 AED', risk: 'Low' },
-  { name: 'Chioma Okafor', country: '🇳🇬 Nigeria', kyc: 'verified', volume: '96,200 AED', risk: 'Low' },
-  { name: 'Kwesi Mensah', country: '🇬🇭 Ghana', kyc: 'review', volume: '12,800 AED', risk: 'Medium' },
-  { name: 'James Mwangi', country: '🇰🇪 Kenya', kyc: 'verified', volume: '44,100 AED', risk: 'Low' },
 ];
 
 const exceptionsSeed = [
@@ -63,6 +56,37 @@ export function AdminPage() {
   const [cases, setCases] = useState(complianceSeed);
   const [exceptions, setExceptions] = useState(exceptionsSeed);
   const [tickets, setTickets] = useState(ticketsSeed);
+
+  const [customers, setCustomers] = useState<AdminCustomer[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(true);
+  const [kycQueue, setKycQueue] = useState<AdminKycCase[]>([]);
+  const [kycLoading, setKycLoading] = useState(true);
+  const [kycActingOn, setKycActingOn] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tab === 'customers') {
+      setCustomersLoading(true);
+      fetchCustomers().then(setCustomers).catch(() => setCustomers([])).finally(() => setCustomersLoading(false));
+    }
+    if (tab === 'compliance') {
+      setKycLoading(true);
+      fetchPendingKyc().then(setKycQueue).catch(() => setKycQueue([])).finally(() => setKycLoading(false));
+    }
+  }, [tab]);
+
+  const approveKycCase = async (c: AdminKycCase) => {
+    setKycActingOn(c.submissionId);
+    await adminApproveKyc(c.userId, c.submissionId);
+    setKycQueue((q) => q.filter((x) => x.submissionId !== c.submissionId));
+    setKycActingOn(null);
+  };
+
+  const rejectKycCase = async (c: AdminKycCase) => {
+    setKycActingOn(c.submissionId);
+    await adminRejectKyc(c.userId, c.submissionId);
+    setKycQueue((q) => q.filter((x) => x.submissionId !== c.submissionId));
+    setKycActingOn(null);
+  };
 
   const tabLabels: Record<Tab, string> = {
     overview: t('admin.nav.overview'),
@@ -204,44 +228,90 @@ export function AdminPage() {
 
         {tab === 'customers' && (
           <div className="card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-ink-100 bg-ink-50/50">
-                    <th className="text-left text-xs font-semibold text-ink-500 uppercase tracking-wider px-6 py-3">{t('admin.nav.customers')}</th>
-                    <th className="text-left text-xs font-semibold text-ink-500 uppercase tracking-wider px-4 py-3 hidden sm:table-cell">KYC</th>
-                    <th className="text-right text-xs font-semibold text-ink-500 uppercase tracking-wider px-4 py-3">{t('biz.overview.volume')}</th>
-                    <th className="text-right text-xs font-semibold text-ink-500 uppercase tracking-wider px-6 py-3">Risk</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {customers.map((c, i) => (
-                    <tr key={i} className="border-b border-ink-50 hover:bg-ink-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-ink-900 text-sm">{c.name}</div>
-                        <div className="text-xs text-ink-400">{c.country}</div>
-                      </td>
-                      <td className="px-4 py-4 hidden sm:table-cell">
-                        <span className={`badge ${c.kyc === 'verified' ? 'bg-vanta-50 text-vanta-700' : 'bg-warning-50 text-warning-700'}`}>{c.kyc}</span>
-                      </td>
-                      <td className="px-4 py-4 text-right font-semibold text-ink-900 text-sm">{c.volume}</td>
-                      <td className="px-6 py-4 text-right">
-                        <span className={`badge ${c.risk === 'Low' ? 'bg-vanta-50 text-vanta-700' : 'bg-warning-50 text-warning-700'}`}>{c.risk}</span>
-                      </td>
+            {customersLoading ? (
+              <div className="p-10 flex items-center justify-center text-ink-400">
+                <Loader2 className="w-5 h-5 animate-spin" />
+              </div>
+            ) : customers.length === 0 ? (
+              <div className="p-10 text-center text-sm text-ink-400">{t('admin.noCustomers')}</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-ink-100 bg-ink-50/50">
+                      <th className="text-left text-xs font-semibold text-ink-500 uppercase tracking-wider px-6 py-3">{t('admin.nav.customers')}</th>
+                      <th className="text-left text-xs font-semibold text-ink-500 uppercase tracking-wider px-4 py-3 hidden sm:table-cell">KYC</th>
+                      <th className="text-left text-xs font-semibold text-ink-500 uppercase tracking-wider px-4 py-3 hidden md:table-cell">{t('admin.customers.type')}</th>
+                      <th className="text-right text-xs font-semibold text-ink-500 uppercase tracking-wider px-6 py-3">{t('admin.customers.txCount')}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {customers.map((c) => (
+                      <tr key={c.id} className="border-b border-ink-50 hover:bg-ink-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-ink-900 text-sm">{c.name}</div>
+                          <div className="text-xs text-ink-400">{c.email}</div>
+                        </td>
+                        <td className="px-4 py-4 hidden sm:table-cell">
+                          <span className={`badge ${c.kycStatus === 'verified' ? 'bg-vanta-50 text-vanta-700' : c.kycStatus === 'pending' ? 'bg-warning-50 text-warning-700' : 'bg-ink-100 text-ink-500'}`}>
+                            {c.kycStatus}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 hidden md:table-cell text-sm text-ink-600 capitalize">{c.accountType}</td>
+                        <td className="px-6 py-4 text-right font-semibold text-ink-900 text-sm">{c.transactionCount}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
         {tab === 'compliance' && (
           <div className="space-y-3">
+            {kycLoading ? (
+              <div className="p-10 flex items-center justify-center text-ink-400">
+                <Loader2 className="w-5 h-5 animate-spin" />
+              </div>
+            ) : kycQueue.length === 0 ? (
+              <div className="card p-10 text-center text-sm text-ink-400">{t('admin.noPendingKyc')}</div>
+            ) : (
+              kycQueue.map((c) => (
+                <div key={c.submissionId} className="card p-5 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-vanta-50 flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-5 h-5 text-vanta-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-ink-900 text-sm">{c.name} <span className="text-ink-400 font-normal">· {c.email}</span></div>
+                    <div className="text-xs text-ink-400 font-mono">{c.docType} · {c.docNumber}</div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => approveKycCase(c)}
+                      disabled={kycActingOn === c.submissionId}
+                      className="btn-primary text-xs px-3 py-2 disabled:opacity-50"
+                    >
+                      {kycActingOn === c.submissionId ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      {t('admin.comp.approve')}
+                    </button>
+                    <button
+                      onClick={() => rejectKycCase(c)}
+                      disabled={kycActingOn === c.submissionId}
+                      className="btn-outline text-xs px-3 py-2 disabled:opacity-50"
+                    >
+                      <X className="w-3.5 h-3.5" /> {t('admin.comp.flag')}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+
+            {/* Legacy simulated risk cases — not yet backed by a real detection system */}
             {cases.map((c) => (
-              <div key={c.id} className="card p-5 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-vanta-50 flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-vanta-600" />
+              <div key={c.id} className="card p-5 flex items-center gap-4 opacity-70">
+                <div className="w-10 h-10 rounded-xl bg-ink-100 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-ink-400" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-ink-900 text-sm">{c.subject}</div>
