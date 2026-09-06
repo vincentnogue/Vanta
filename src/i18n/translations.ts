@@ -26,6 +26,7 @@ export type TranslationKey =
   | 'footer.entity' | 'footer.entityReg' | 'footer.entityAddress' | 'footer.entityOffice' | 'footer.safeguarding' | 'footer.complaints'
   | 'lang.switch' | 'footer.license' | 'hero.trustLine'
   | 'dash.nav.home' | 'dash.nav.send' | 'dash.nav.recipients' | 'dash.nav.activity' | 'dash.nav.balances' | 'dash.nav.cards' | 'dash.nav.exchange' | 'dash.nav.security' | 'dash.nav.settings' | 'dash.nav.support' | 'dash.nav.backToSite'
+  | 'dash.search.empty' | 'dash.notifications' | 'dash.notifications.empty' | 'dash.notifications.pending'
   | 'cards.title' | 'cards.subtitle' | 'cards.add' | 'cards.empty' | 'cards.default' | 'cards.setDefault' | 'cards.remove' | 'cards.holder' | 'cards.expires' | 'cards.added' | 'cards.topUp'
   | 'psp.badge' | 'psp.title' | 'psp.subtitle' | 'psp.cta' | 'psp.funnel'
   | 'dash.home.totalBalance' | 'dash.home.sendMoney' | 'dash.home.exchange' | 'dash.home.addRecipient' | 'dash.home.recentActivity' | 'dash.home.pending' | 'dash.home.viewAll' | 'dash.home.welcome'
@@ -224,6 +225,10 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.nav.settings': 'Settings',
     'dash.nav.support': 'Support',
     'dash.nav.backToSite': 'Back to site',
+    'dash.search.empty': 'No matching transactions',
+    'dash.notifications': 'Notifications',
+    'dash.notifications.empty': 'You\'re all caught up',
+    'dash.notifications.pending': 'Transfer in progress to',
 
     'cards.title': 'Payment methods',
     'cards.subtitle': 'Manage your saved cards for instant top-ups',
@@ -843,6 +848,10 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.nav.settings': 'Paramètres',
     'dash.nav.support': 'Support',
     'dash.nav.backToSite': 'Retour au site',
+    'dash.search.empty': 'Aucune transaction correspondante',
+    'dash.notifications': 'Notifications',
+    'dash.notifications.empty': 'Tout est à jour',
+    'dash.notifications.pending': 'Transfert en cours vers',
 
     'cards.title': 'Moyens de paiement',
     'cards.subtitle': 'Gérez vos cartes enregistrées pour recharger instantanément',
