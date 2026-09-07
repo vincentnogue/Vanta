@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useI18n } from '@/i18n/I18nContext';
 import { type Route } from '@/router/RouterContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
@@ -7,10 +7,11 @@ import {
   LayoutDashboard, CreditCard, ArrowLeftRight, Users, Wallet, Repeat,
   Landmark, Users2, Shield, FileBarChart, Settings,
   Upload, Building, TrendingUp, Clock, CheckCircle2, Check, Plus, KeyRound,
-  DollarSign, Activity, Globe, Zap, Smartphone,
+  DollarSign, Activity, Globe, Zap, Smartphone, Link2, Copy, Archive, Loader2,
 } from 'lucide-react';
 import { formatCurrency, getCurrencyByCode, currencies as allCurrencies, getFxRate } from '@/data/mockData';
 import { useStore } from '@/data/store';
+import { listPaymentLinks, createPaymentLink, archivePaymentLink, type PaymentLink } from '@/data/paymentLinks';
 
 type Tab = 'overview' | 'payments' | 'transfers' | 'recipients' | 'balances' | 'fx' | 'treasury' | 'payroll' | 'team' | 'compliance' | 'reports' | 'settings';
 
@@ -78,6 +79,48 @@ export function BusinessDashboard() {
   const [fxTo, setFxTo] = useState('AED');
   const [fxAmount, setFxAmount] = useState('');
   const [saved, setSaved] = useState(false);
+
+  const [links, setLinks] = useState<PaymentLink[]>([]);
+  const [linksLoading, setLinksLoading] = useState(true);
+  const [showCreateLink, setShowCreateLink] = useState(false);
+  const [copiedLinkId, setCopiedLinkId] = useState<string | null>(null);
+  const [newLinkAmount, setNewLinkAmount] = useState('');
+  const [newLinkCurrency, setNewLinkCurrency] = useState('USD');
+  const [newLinkDesc, setNewLinkDesc] = useState('');
+  const [creatingLink, setCreatingLink] = useState(false);
+
+  useEffect(() => {
+    if (tab === 'payments' || tab === 'transfers') {
+      listPaymentLinks().then(setLinks).catch(() => setLinks([])).finally(() => setLinksLoading(false));
+    }
+  }, [tab]);
+
+  const handleCreateLink = async () => {
+    const amount = parseFloat(newLinkAmount);
+    if (!amount || amount <= 0) return;
+    setCreatingLink(true);
+    try {
+      const link = await createPaymentLink(amount, newLinkCurrency, newLinkDesc);
+      setLinks((ls) => [link, ...ls]);
+      setShowCreateLink(false);
+      setNewLinkAmount('');
+      setNewLinkDesc('');
+    } finally {
+      setCreatingLink(false);
+    }
+  };
+
+  const handleArchiveLink = async (id: string) => {
+    setLinks((ls) => ls.filter((l) => l.id !== id));
+    await archivePaymentLink(id);
+  };
+
+  const handleCopyLink = (id: string) => {
+    const url = `${window.location.origin}${window.location.pathname}#/paylink/${id}`;
+    navigator.clipboard?.writeText(url).catch(() => {});
+    setCopiedLinkId(id);
+    setTimeout(() => setCopiedLinkId(null), 1600);
+  };
 
   const tabLabels: Record<Tab, string> = {
     overview: t('biz.nav.overview'),
@@ -249,6 +292,79 @@ export function BusinessDashboard() {
                 <Activity className="w-4 h-4 text-success-500" />
                 <span>{lang === 'fr' ? 'Temps réel' : 'Real-time'}</span>
               </div>
+            </div>
+
+            {/* Payment links — real, backed by Supabase + Stripe, not seed data */}
+            <div className="card p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Link2 className="w-5 h-5 text-vanta-600" />
+                  <h3 className="font-display text-lg font-bold text-vanta-900">{t('biz.links.title')}</h3>
+                </div>
+                <button onClick={() => setShowCreateLink((v) => !v)} className="btn-primary text-sm">
+                  <Plus className="w-4 h-4" /> {t('biz.links.create')}
+                </button>
+              </div>
+
+              {showCreateLink && (
+                <div className="rounded-xl border border-ink-200 bg-ink-50/40 p-4 mb-4 animate-fade-in space-y-3">
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('biz.links.amount')}</label>
+                      <input type="number" min="1" step="0.01" value={newLinkAmount} onChange={(e) => setNewLinkAmount(e.target.value)} placeholder="100.00" className="input py-2.5" />
+                    </div>
+                    <div className="w-28">
+                      <label className="text-xs font-semibold text-ink-500 mb-1.5 block">Devise</label>
+                      <select value={newLinkCurrency} onChange={(e) => setNewLinkCurrency(e.target.value)} className="input py-2.5">
+                        {['USD', 'EUR', 'GBP', 'XAF', 'XOF', 'NGN', 'KES', 'GHS'].map((c) => (
+                          <option key={c} value={c}>{getCurrencyByCode(c)?.flag} {c}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('biz.links.description')}</label>
+                    <input value={newLinkDesc} onChange={(e) => setNewLinkDesc(e.target.value)} placeholder={t('biz.links.descPlaceholder')} className="input py-2.5" />
+                  </div>
+                  <button
+                    onClick={handleCreateLink}
+                    disabled={creatingLink || !newLinkAmount || parseFloat(newLinkAmount) <= 0}
+                    className="btn-primary text-sm disabled:opacity-50"
+                  >
+                    {creatingLink ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                    {t('biz.links.create')}
+                  </button>
+                </div>
+              )}
+
+              {linksLoading ? (
+                <div className="py-8 flex items-center justify-center text-ink-400">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                </div>
+              ) : links.length === 0 ? (
+                <div className="py-8 text-center text-sm text-ink-400">{t('biz.links.empty')}</div>
+              ) : (
+                <div className="space-y-2">
+                  {links.map((l) => (
+                    <div key={l.id} className="flex items-center gap-3 p-3 rounded-xl border border-ink-100 hover:bg-ink-50/60 transition-colors">
+                      <div className="w-9 h-9 rounded-lg bg-vanta-50 flex items-center justify-center shrink-0">
+                        <Link2 className="w-4 h-4 text-vanta-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-ink-900 text-sm">{formatCurrency(l.amount, l.currency)}</div>
+                        <div className="text-xs text-ink-400 truncate">{l.description || l.id}</div>
+                      </div>
+                      <span className="badge bg-vanta-50 text-vanta-700 text-[10px] shrink-0">{t('biz.links.active')}</span>
+                      <button onClick={() => handleCopyLink(l.id)} className="p-2 rounded-lg text-ink-500 hover:bg-ink-100 transition-colors shrink-0" title={t('biz.links.copyLink')}>
+                        {copiedLinkId === l.id ? <Check className="w-4 h-4 text-vanta-600" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                      <button onClick={() => handleArchiveLink(l.id)} className="p-2 rounded-lg text-ink-400 hover:bg-danger-50 hover:text-danger-500 transition-colors shrink-0" title={t('biz.links.archive')}>
+                        <Archive className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">

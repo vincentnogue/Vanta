@@ -18,6 +18,7 @@ const ApiPortal = lazy(() => import('@/pages/ApiPortal').then((m) => ({ default:
 const AdminPage = lazy(() => import('@/pages/AdminPage').then((m) => ({ default: m.AdminPage })));
 const SuperAdminPage = lazy(() => import('@/pages/SuperAdminPage').then((m) => ({ default: m.SuperAdminPage })));
 const InfoPage = lazy(() => import('@/pages/InfoPage').then((m) => ({ default: m.InfoPage })));
+const PayLinkPage = lazy(() => import('@/pages/PayLinkPage').then((m) => ({ default: m.PayLinkPage })));
 
 function RouteLoader() {
   return (
@@ -60,6 +61,7 @@ function AppContent() {
   else if (route === 'api') page = <ApiPortal />;
   else if (route === 'admin') page = <AdminPage />;
   else if (route === 'superadmin') page = <SuperAdminPage />;
+  else if (route === 'paylink') page = <PayLinkPage />;
   else if (INFO_ROUTES.includes(route as InfoPageKey)) page = <InfoPage page={route as InfoPageKey} />;
   else page = <LandingPage />;
 

@@ -77,6 +77,9 @@ export type TranslationKey =
   | 'pricing.bank.title' | 'pricing.bank.rate' | 'pricing.bank.desc'
   | 'pricing.payout.title' | 'pricing.payout.rate' | 'pricing.payout.desc'
   | 'pricing.note'
+  | 'paylink.notFound' | 'paylink.notFoundDesc' | 'paylink.success' | 'paylink.paidTo' | 'paylink.payingTo' | 'paylink.demoNote'
+  | 'biz.links.title' | 'biz.links.create' | 'biz.links.amount' | 'biz.links.description' | 'biz.links.descPlaceholder'
+  | 'biz.links.copyLink' | 'biz.links.copied' | 'biz.links.archive' | 'biz.links.empty' | 'biz.links.active'
   | 'nav.superadmin' | 'sa.title'
   | 'sa.nav.overview' | 'sa.nav.tenants' | 'sa.nav.transactions' | 'sa.nav.staff' | 'sa.nav.fraud' | 'sa.nav.audit' | 'sa.nav.settings'
   | 'sa.ov.liveFeed' | 'sa.ov.volumeToday' | 'sa.ov.activeTenants' | 'sa.ov.activeUsers' | 'sa.ov.tps' | 'sa.ov.uptime' | 'sa.ov.alerts' | 'sa.ov.volumeByDay' | 'sa.ov.tenantsByPlan'
@@ -605,6 +608,22 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pricing.payout.rate': '~1.0%',
     'pricing.payout.desc': 'Sending out to M-Pesa, MTN Momo, Orange Money, or a local bank account across Africa.',
     'pricing.note': 'No monthly fees, no minimum balance, no charge for holding money in your account.',
+    'paylink.notFound': 'Payment link not found',
+    'paylink.notFoundDesc': 'This link may have been archived or the address is incorrect.',
+    'paylink.success': 'Payment successful',
+    'paylink.paidTo': 'paid to',
+    'paylink.payingTo': 'You\'re paying',
+    'paylink.demoNote': 'Stripe isn\'t connected yet — this simulates the payment.',
+    'biz.links.title': 'Payment links',
+    'biz.links.create': 'Create link',
+    'biz.links.amount': 'Amount',
+    'biz.links.description': 'Description',
+    'biz.links.descPlaceholder': 'Invoice #, product name...',
+    'biz.links.copyLink': 'Copy link',
+    'biz.links.copied': 'Copied',
+    'biz.links.archive': 'Archive',
+    'biz.links.empty': 'No payment links yet — create one to start collecting payments from your customers.',
+    'biz.links.active': 'Active',
     'pay.newCard': 'Use a new card',
     'pay.saveCard': 'Save this card for future payments',
 
@@ -1236,6 +1255,22 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'pricing.payout.rate': '~1,0 %',
     'pricing.payout.desc': 'Envoi vers M-Pesa, MTN Momo, Orange Money, ou un compte bancaire local en Afrique.',
     'pricing.note': 'Aucun frais mensuel, aucun solde minimum, rien pour la simple détention d\'argent sur le compte.',
+    'paylink.notFound': 'Lien de paiement introuvable',
+    'paylink.notFoundDesc': 'Ce lien a peut-être été archivé, ou l\'adresse est incorrecte.',
+    'paylink.success': 'Paiement réussi',
+    'paylink.paidTo': 'payé à',
+    'paylink.payingTo': 'Vous payez',
+    'paylink.demoNote': 'Stripe n\'est pas encore connecté — ceci simule le paiement.',
+    'biz.links.title': 'Liens de paiement',
+    'biz.links.create': 'Créer un lien',
+    'biz.links.amount': 'Montant',
+    'biz.links.description': 'Description',
+    'biz.links.descPlaceholder': 'N° de facture, nom du produit...',
+    'biz.links.copyLink': 'Copier le lien',
+    'biz.links.copied': 'Copié',
+    'biz.links.archive': 'Archiver',
+    'biz.links.empty': 'Aucun lien de paiement pour le moment — créez-en un pour encaisser vos clients.',
+    'biz.links.active': 'Actif',
     'pay.newCard': 'Utiliser une nouvelle carte',
     'pay.saveCard': 'Enregistrer cette carte pour les prochains paiements',
 

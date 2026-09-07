@@ -27,24 +27,35 @@ type Route =
   | 'licenses'
   | 'compliance'
   | 'status'
-  | 'blog';
+  | 'blog'
+  | 'paylink';
 
 type RouterContextValue = {
   route: Route;
-  navigate: (route: Route) => void;
+  navigate: (route: Route, param?: string) => void;
 };
 
 const RouterContext = createContext<RouterContextValue | null>(null);
 
 const validRoutes: Route[] = [
   'home', 'consumer', 'business', 'api', 'admin', 'superadmin', 'auth', 'kyc', 'send', 'recipients', 'activity', 'balances', 'cards', 'exchange', 'security', 'settings', 'support',
-  'about', 'careers', 'press', 'contact', 'privacy', 'terms', 'licenses', 'compliance', 'status', 'blog',
+  'about', 'careers', 'press', 'contact', 'privacy', 'terms', 'licenses', 'compliance', 'status', 'blog', 'paylink',
 ];
 
 function parseHash(): Route {
-  const hash = window.location.hash.replace('#/', '').replace('#', '');
-  if (validRoutes.includes(hash as Route)) return hash as Route;
+  const raw = window.location.hash.replace('#/', '').replace('#', '');
+  const base = raw.split('/')[0];
+  if (validRoutes.includes(base as Route)) return base as Route;
   return 'home';
+}
+
+/** For routes that carry an id in the URL (currently just payment links):
+ * reads it straight from the hash rather than threading a param through
+ * the whole router type. */
+export function getRouteParam(): string | null {
+  const raw = window.location.hash.replace('#/', '').replace('#', '');
+  const parts = raw.split('/');
+  return parts.length > 1 && parts[1] ? decodeURIComponent(parts[1]) : null;
 }
 
 export function RouterProvider({ children }: { children: ReactNode }) {
@@ -56,8 +67,8 @@ export function RouterProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  const navigate = (newRoute: Route) => {
-    window.location.hash = `/${newRoute}`;
+  const navigate = (newRoute: Route, param?: string) => {
+    window.location.hash = param ? `/${newRoute}/${encodeURIComponent(param)}` : `/${newRoute}`;
     setRoute(newRoute);
     window.scrollTo(0, 0);
   };
