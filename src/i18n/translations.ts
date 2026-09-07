@@ -60,6 +60,8 @@ export type TranslationKey =
   | 'admin.nav.overview' | 'admin.nav.transactions' | 'admin.nav.customers' | 'admin.nav.compliance' | 'admin.nav.providers' | 'admin.nav.treasury' | 'admin.nav.reconciliation' | 'admin.nav.support'
   | 'admin.customers.type' | 'admin.customers.txCount' | 'admin.noCustomers' | 'admin.noPendingKyc'
   | 'admin.ov.volume' | 'admin.ov.transactions' | 'admin.ov.success' | 'admin.ov.revenue' | 'admin.ov.fx' | 'admin.ov.compliance' | 'admin.ov.fraud' | 'admin.ov.liquidity'
+  | 'admin.providers.connected' | 'admin.providers.notConnected' | 'admin.providers.noWebhook' | 'admin.providers.manageSecrets'
+  | 'admin.treasury.platformRevenue' | 'admin.treasury.noRevenue' | 'admin.treasury.commissionEarned'
   | 'admin.prov.title' | 'admin.prov.success' | 'admin.prov.latency' | 'admin.prov.cost' | 'admin.prov.status' | 'admin.prov.online' | 'admin.prov.degraded'
   | 'admin.comp.title' | 'admin.comp.queue' | 'admin.comp.review' | 'admin.comp.approve' | 'admin.comp.flag'
   | 'admin.rec.title' | 'admin.rec.exceptions' | 'admin.rec.matched' | 'admin.rec.mismatch'
@@ -513,6 +515,13 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'admin.ov.compliance': 'Pending compliance',
     'admin.ov.fraud': 'Fraud alerts',
     'admin.ov.liquidity': 'Liquidity alerts',
+    'admin.providers.connected': 'Connected',
+    'admin.providers.notConnected': 'Not connected',
+    'admin.providers.noWebhook': 'webhook not configured',
+    'admin.providers.manageSecrets': 'Manage secrets on Supabase',
+    'admin.treasury.platformRevenue': 'Platform revenue',
+    'admin.treasury.noRevenue': 'No commission collected yet.',
+    'admin.treasury.commissionEarned': 'Commission earned',
 
     'admin.prov.title': 'Provider health',
     'admin.prov.success': 'Success',
@@ -1164,6 +1173,13 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'admin.ov.compliance': 'Conformité en attente',
     'admin.ov.fraud': 'Alertes fraude',
     'admin.ov.liquidity': 'Alertes liquidité',
+    'admin.providers.connected': 'Connecté',
+    'admin.providers.notConnected': 'Non connecté',
+    'admin.providers.noWebhook': 'webhook non configuré',
+    'admin.providers.manageSecrets': 'Gérer les secrets sur Supabase',
+    'admin.treasury.platformRevenue': 'Revenus de la plateforme',
+    'admin.treasury.noRevenue': 'Aucune commission perçue pour le moment.',
+    'admin.treasury.commissionEarned': 'Commission perçue',
 
     'admin.prov.title': 'Santé des fournisseurs',
     'admin.prov.success': 'Réussite',

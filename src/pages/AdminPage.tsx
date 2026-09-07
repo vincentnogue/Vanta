@@ -4,12 +4,15 @@ import { type Route } from '@/router/RouterContext';
 import {
   LayoutDashboard, ArrowLeftRight, Users, ShieldCheck, Network, Vault,
   FileCheck, LifeBuoy, TrendingUp, AlertTriangle, DollarSign, Activity, Check, Flag, X, Loader2,
+  CheckCircle2, XCircle, ExternalLink,
 } from 'lucide-react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import { StatusBadge } from '@/components/StatusBadge';
 import { formatCurrency } from '@/data/mockData';
 import { useStore } from '@/data/store';
 import { fetchCustomers, fetchPendingKyc, adminApproveKyc, adminRejectKyc, type AdminCustomer, type AdminKycCase } from '@/data/admin';
+import { fetchPspStatus, type PspConnector } from '@/data/pspStatus';
+import { supabase } from '@/lib/supabase';
 
 type Tab = 'overview' | 'transactions' | 'customers' | 'compliance' | 'providers' | 'treasury' | 'reconciliation' | 'support';
 
@@ -62,6 +65,28 @@ export function AdminPage() {
   const [kycQueue, setKycQueue] = useState<AdminKycCase[]>([]);
   const [kycLoading, setKycLoading] = useState(true);
   const [kycActingOn, setKycActingOn] = useState<string | null>(null);
+
+  const [connectors, setConnectors] = useState<PspConnector[]>([]);
+  const [connectorsLoading, setConnectorsLoading] = useState(true);
+  const [platformRevenue, setPlatformRevenue] = useState<{ currency: string; total: number }[]>([]);
+  const [revenueLoading, setRevenueLoading] = useState(true);
+
+  useEffect(() => {
+    if (tab === 'providers') {
+      setConnectorsLoading(true);
+      fetchPspStatus().then(setConnectors).catch(() => setConnectors([])).finally(() => setConnectorsLoading(false));
+    }
+    if (tab === 'treasury') {
+      setRevenueLoading(true);
+      (async () => {
+        const { data } = await supabase.from('platform_revenue').select('amount, currency');
+        const totals = new Map<string, number>();
+        (data ?? []).forEach((r) => totals.set(r.currency, (totals.get(r.currency) ?? 0) + Number(r.amount)));
+        setPlatformRevenue([...totals.entries()].map(([currency, total]) => ({ currency, total })));
+        setRevenueLoading(false);
+      })();
+    }
+  }, [tab]);
 
   useEffect(() => {
     if (tab === 'customers') {
@@ -337,25 +362,76 @@ export function AdminPage() {
         )}
 
         {tab === 'providers' && (
-          <div className="card overflow-hidden">
-            <div className="divide-y divide-ink-100">{providers.map(providerCard)}</div>
+          <div className="space-y-3">
+            {connectorsLoading ? (
+              <div className="p-10 flex items-center justify-center text-ink-400"><Loader2 className="w-5 h-5 animate-spin" /></div>
+            ) : (
+              connectors.map((c) => (
+                <div key={c.id} className="card p-5 flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.configured ? 'bg-vanta-50' : 'bg-ink-100'}`}>
+                    {c.configured ? <CheckCircle2 className="w-5 h-5 text-vanta-600" /> : <XCircle className="w-5 h-5 text-ink-400" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-ink-900 text-sm">{c.name}</div>
+                    <div className="text-xs text-ink-400">
+                      {c.configured ? t('admin.providers.connected') : t('admin.providers.notConnected')}
+                      {c.configured && !c.webhookConfigured && ` · ${t('admin.providers.noWebhook')}`}
+                    </div>
+                  </div>
+                  <span className={`badge ${c.configured ? 'bg-vanta-50 text-vanta-700' : 'bg-ink-100 text-ink-500'}`}>
+                    {c.configured ? t('admin.providers.connected') : t('admin.providers.notConnected')}
+                  </span>
+                </div>
+              ))
+            )}
+            <a
+              href="https://supabase.com/dashboard/project/vtfmfuzewrzumsmuoqwt/settings/functions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-outline text-sm inline-flex"
+            >
+              <ExternalLink className="w-4 h-4" /> {t('admin.providers.manageSecrets')}
+            </a>
           </div>
         )}
 
         {tab === 'treasury' && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {liquidity.map((l, i) => (
-              <div key={l.currency} className="card p-5 animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-display font-bold text-black">{l.currency}</span>
-                  <span className="text-sm font-semibold text-ink-600">{l.amount}</span>
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-display text-sm font-bold text-ink-500 uppercase tracking-wider mb-3">{t('admin.treasury.platformRevenue')}</h3>
+              {revenueLoading ? (
+                <div className="p-6 flex items-center justify-center text-ink-400"><Loader2 className="w-5 h-5 animate-spin" /></div>
+              ) : platformRevenue.length === 0 ? (
+                <div className="card p-6 text-sm text-ink-400">{t('admin.treasury.noRevenue')}</div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {platformRevenue.map((r) => (
+                    <div key={r.currency} className="card p-5">
+                      <div className="text-xs text-ink-400 mb-1">{t('admin.treasury.commissionEarned')}</div>
+                      <div className="font-display text-2xl font-bold text-vanta-900">{formatCurrency(r.total, r.currency)}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="h-2 bg-ink-100 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all duration-1000 ${l.pct > 60 ? 'bg-vanta-500' : l.pct > 45 ? 'bg-warning-500' : 'bg-danger-500'}`} style={{ width: `${l.pct}%` }} />
-                </div>
-                <div className="text-xs text-ink-400 mt-2">{l.pct}% {t('admin.ov.liquidity').toLowerCase()}</div>
+              )}
+            </div>
+
+            <div>
+              <h3 className="font-display text-sm font-bold text-ink-500 uppercase tracking-wider mb-3">{t('admin.ov.liquidity')}</h3>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {liquidity.map((l, i) => (
+                  <div key={l.currency} className="card p-5 animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-display font-bold text-black">{l.currency}</span>
+                      <span className="text-sm font-semibold text-ink-600">{l.amount}</span>
+                    </div>
+                    <div className="h-2 bg-ink-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full transition-all duration-1000 ${l.pct > 60 ? 'bg-vanta-500' : l.pct > 45 ? 'bg-warning-500' : 'bg-danger-500'}`} style={{ width: `${l.pct}%` }} />
+                    </div>
+                    <div className="text-xs text-ink-400 mt-2">{l.pct}% {t('admin.ov.liquidity').toLowerCase()}</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         )}
 
