@@ -204,13 +204,13 @@ function SendMoney() {
   const [step, setStep] = useState(1);
   const [destCountry, setDestCountry] = useState('');
   const [sendAmount, setSendAmount] = useState('');
-  const [sendCurrency, setSendCurrency] = useState('AED');
-  const [fundingMethod, setFundingMethod] = useState('');
+  const { recipients, balances } = useStore();
+  const [sendCurrency, setSendCurrency] = useState(() => balances[0]?.currency ?? 'USD');
   const [recipient, setRecipient] = useState('');
   const [payoutMethod, setPayoutMethod] = useState('');
   const [success, setSuccess] = useState(false);
   const [txId, setTxId] = useState('');
-  const { recipients, balances } = useStore();
+  const [showTopUp, setShowTopUp] = useState(false);
   const { user } = useAuth();
   const kycVerified = user?.kycStatus === 'verified';
   const [insufficient, setInsufficient] = useState(false);
@@ -236,12 +236,6 @@ function SendMoney() {
   const rate = getFxRateFor(sendCurrency, payoutCurrency);
   const recipientGets = Math.round((amount - fee) * rate * 100) / 100;
   const selectedRecipient = recipients.find((r) => r.id === recipient);
-
-  const fundingOptions = [
-    { id: 'bank_transfer', icon: 'Building2', labelEn: 'Bank transfer', labelFr: 'Virement bancaire' },
-    { id: 'debit_card', icon: 'CreditCard', labelEn: 'Debit card', labelFr: 'Carte de débit' },
-    { id: 'open_banking', icon: 'Landmark', labelEn: 'Open banking', labelFr: 'Open banking' },
-  ];
 
   const balanceForSend = balances.find((b) => b.currency === sendCurrency);
   const hasFunds = !!balanceForSend && balanceForSend.available >= amount && amount > 0;
@@ -364,12 +358,15 @@ function SendMoney() {
                       onChange={(e) => setSendCurrency(e.target.value)}
                       className="input w-32 font-semibold"
                     >
-                      {['AED', 'USD', 'EUR', 'GBP'].map((c) => {
+                      {(balances.length > 0 ? balances.map((b) => b.currency) : ['USD']).map((c) => {
                         const cur = getCurrencyByCode(c);
                         return <option key={c} value={c}>{cur?.flag} {c}</option>;
                       })}
                     </select>
                   </div>
+                  <p className="mt-1.5 text-xs text-ink-400">
+                    {t('dash.send.availableBalance')}: {formatCurrency(balanceForSend?.available ?? 0, sendCurrency)}
+                  </p>
                 </div>
 
                 {amount > 0 && (
@@ -405,32 +402,39 @@ function SendMoney() {
             </div>
           )}
 
-          {/* Step 3: Funding */}
+          {/* Step 3: Funding source — real wallet balance check, not a decorative choice */}
           {step === 3 && (
             <div className="animate-fade-in">
               <h2 className="font-display text-lg font-bold text-vanta-900 mb-4">{t('dash.send.funding')}</h2>
-              <div className="space-y-3">
-                {fundingOptions.map((opt) => {
-                  const Icon = iconMap[opt.icon];
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => { setFundingMethod(opt.id); setStep(4); }}
-                      className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 text-left ${
-                        fundingMethod === opt.id ? 'border-vanta-500 bg-vanta-50' : 'border-ink-200 hover:border-vanta-300'
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-vanta-100 flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-vanta-700" />
-                      </div>
-                      <span className="font-semibold text-ink-900">{lang === 'fr' ? opt.labelFr : opt.labelEn}</span>
-                    </button>
-                  );
-                })}
+              <div className={`rounded-xl border-2 p-5 ${hasFunds ? 'border-vanta-200 bg-vanta-50' : 'border-danger-200 bg-danger-50'}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-ink-500 mb-1">{t('dash.send.availableBalance')}</div>
+                    <div className="font-display text-xl font-bold text-vanta-900">
+                      {formatCurrency(balanceForSend?.available ?? 0, sendCurrency)}
+                    </div>
+                  </div>
+                  <Wallet className={`w-8 h-8 ${hasFunds ? 'text-vanta-500' : 'text-danger-400'}`} />
+                </div>
+                {!hasFunds && (
+                  <p className="mt-3 text-sm text-danger-600 font-medium">{t('bal.insufficient')}</p>
+                )}
               </div>
-              <button onClick={() => setStep(2)} className="btn-outline mt-4">
-                {t('common.back')}
-              </button>
+
+              {!hasFunds && (
+                <button onClick={() => setShowTopUp(true)} className="btn-accent w-full mt-4 justify-center">
+                  <CreditCard className="w-4 h-4" /> {t('dash.send.topUpToFund')}
+                </button>
+              )}
+
+              <div className="flex gap-3 mt-4">
+                <button onClick={() => setStep(2)} className="btn-outline flex-1">
+                  {t('common.back')}
+                </button>
+                <button onClick={() => hasFunds && setStep(4)} disabled={!hasFunds} className="btn-primary flex-1 disabled:opacity-50">
+                  {t('common.next')}
+                </button>
+              </div>
             </div>
           )}
 
@@ -537,6 +541,13 @@ function SendMoney() {
             </div>
           )}
         </div>
+
+        <PspCheckout
+          open={showTopUp}
+          currencies={[sendCurrency]}
+          defaultCurrency={sendCurrency}
+          onClose={() => setShowTopUp(false)}
+        />
       </div>
     </DashboardLayout>
   );
@@ -829,7 +840,7 @@ function Balances() {
         <PspCheckout
           open={showAdd}
           currencies={balances.map((b) => b.currency)}
-          defaultCurrency={balances[0]?.currency ?? 'AED'}
+          defaultCurrency={balances[0]?.currency ?? 'USD'}
           onClose={() => setShowAdd(false)}
         />
 
@@ -868,12 +879,16 @@ function Balances() {
 function Exchange() {
   const { t } = useI18n();
   const { user } = useAuth();
+  const { balances } = useStore();
   const kycVerified = user?.kycStatus === 'verified';
-  const [fromCurrency, setFromCurrency] = useState('AED');
-  const [toCurrency, setToCurrency] = useState('USD');
+  const [fromCurrency, setFromCurrency] = useState(() => balances[0]?.currency ?? 'USD');
+  const [toCurrency, setToCurrency] = useState(() => balances[1]?.currency ?? (balances[0]?.currency === 'USD' ? 'EUR' : 'USD'));
   const [amount, setAmount] = useState('');
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
+
+  const fromBalance = balances.find((b) => b.currency === fromCurrency);
+  const hasFunds = !!fromBalance && fromBalance.available > 0;
 
   const handleExchange = () => {
     const value = parseFloat(amount);
@@ -926,6 +941,9 @@ function Exchange() {
                 ))}
               </select>
             </div>
+            <p className="mt-1.5 text-xs text-ink-400">
+              {t('dash.send.availableBalance')}: {formatCurrency(fromBalance?.available ?? 0, fromCurrency)}
+            </p>
           </div>
 
           <div className="flex justify-center">
@@ -956,7 +974,7 @@ function Exchange() {
             <p className="text-center text-sm text-danger-600 font-medium animate-fade-in">{t('ex.insufficient')}</p>
           )}
 
-          <button onClick={handleExchange} className="btn-accent w-full text-base py-4">
+          <button onClick={handleExchange} disabled={!hasFunds || fromCurrency === toCurrency} className="btn-accent w-full text-base py-4 disabled:opacity-50">
             {done ? <><Check className="w-5 h-5" /> {t('ex.success')}</> : t('dash.exchange.exchange')}
           </button>
         </div>

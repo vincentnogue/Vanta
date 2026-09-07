@@ -3,8 +3,8 @@ import { useI18n } from '@/i18n/I18nContext';
 import { useRouter } from '@/router/RouterContext';
 import { Logo } from '@/components/Logo';
 import { LanguageToggle } from '@/components/LanguageToggle';
-import { signIn, signUp, signInWithGoogle, isSuperAdminEmail } from '@/data/auth';
-import { ArrowLeft, Mail, Lock, ArrowRight, Check, User, Building2, AlertCircle } from 'lucide-react';
+import { signIn, signUp, signInWithGoogle, requestPasswordReset, isSuperAdminEmail } from '@/data/auth';
+import { ArrowLeft, Mail, Lock, ArrowRight, Check, User, Building2, AlertCircle, MailCheck } from 'lucide-react';
 
 function initialAccountType(): 'personal' | 'business' {
   try {
@@ -25,6 +25,9 @@ export function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [awaitingEmailConfirmation, setAwaitingEmailConfirmation] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleGoogle = async () => {
     setError(null);
@@ -44,7 +47,15 @@ export function AuthPage() {
     setLoading(true);
     try {
       if (mode === 'signup') {
-        await signUp(email, password, name, accountType);
+        const { needsEmailConfirmation } = await signUp(email, password, name, accountType);
+        if (needsEmailConfirmation) {
+          // No session exists yet — navigating anywhere behind auth would
+          // just bounce the person straight back to this page with no
+          // explanation. Show them what's actually happening instead.
+          setAwaitingEmailConfirmation(true);
+          setLoading(false);
+          return;
+        }
       } else {
         await signIn(email, password);
       }
@@ -59,6 +70,23 @@ export function AuthPage() {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setError(t('auth.forgot.needEmail'));
+      return;
+    }
+    setError(null);
+    setResetLoading(true);
+    try {
+      await requestPasswordReset(email);
+      setResetSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -135,6 +163,26 @@ export function AuthPage() {
 
         <div className="flex-1 flex items-center justify-center px-6 pb-20">
           <div className="w-full max-w-sm">
+            {awaitingEmailConfirmation ? (
+              <div className="text-center animate-fade-in">
+                <div className="w-14 h-14 rounded-full bg-vanta-50 flex items-center justify-center mx-auto mb-4">
+                  <MailCheck className="w-7 h-7 text-vanta-600" />
+                </div>
+                <h1 className="font-display text-2xl font-bold text-vanta-900 tracking-tight">
+                  {t('auth.confirmEmail.title')}
+                </h1>
+                <p className="mt-3 text-ink-500">
+                  {t('auth.confirmEmail.subtitle')} <span className="font-semibold text-ink-800">{email}</span>
+                </p>
+                <button
+                  onClick={() => { setAwaitingEmailConfirmation(false); setMode('signin'); }}
+                  className="mt-6 text-sm font-semibold text-vanta-600 hover:text-vanta-700"
+                >
+                  {t('auth.backToSignin')}
+                </button>
+              </div>
+            ) : (
+            <>
             <h1 className="font-display text-3xl font-bold text-vanta-900 tracking-tight">
               {mode === 'signin' ? t('auth.welcome') : t('auth.createAccount')}
             </h1>
@@ -254,9 +302,20 @@ export function AuthPage() {
 
               {mode === 'signin' && (
                 <div className="flex justify-end">
-                  <button type="button" className="text-sm text-vanta-600 hover:text-vanta-700 font-medium">
-                    {t('auth.forgot')}
-                  </button>
+                  {resetSent ? (
+                    <span className="text-sm text-vanta-600 font-medium flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5" /> {t('auth.forgot.sent')}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleForgotPassword}
+                      disabled={resetLoading}
+                      className="text-sm text-vanta-600 hover:text-vanta-700 font-medium disabled:opacity-60"
+                    >
+                      {resetLoading ? t('auth.forgot.sending') : t('auth.forgot')}
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -281,6 +340,8 @@ export function AuthPage() {
                 {mode === 'signin' ? t('auth.signup') : t('auth.signin')}
               </button>
             </div>
+            </>
+            )}
           </div>
         </div>
       </div>

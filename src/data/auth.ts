@@ -99,13 +99,16 @@ supabase.auth.onAuthStateChange((_event, session) => {
   applySession(session?.user?.id, session?.user?.email);
 });
 
-export async function signUp(email: string, password: string, fullName: string, accountType: AccountType) {
-  const { error } = await supabase.auth.signUp({
+export async function signUp(email: string, password: string, fullName: string, accountType: AccountType): Promise<{ needsEmailConfirmation: boolean }> {
+  const { data, error } = await supabase.auth.signUp({
     email: email.trim().toLowerCase(),
     password,
     options: { data: { full_name: fullName.trim(), account_type: accountType } },
   });
   if (error) throw error;
+  // If email confirmation is required, Supabase returns a user but no
+  // session — there is nothing to navigate the caller into yet.
+  return { needsEmailConfirmation: !data.session };
 }
 
 export async function signIn(email: string, password: string) {
@@ -124,6 +127,13 @@ export async function signInWithGoogle() {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin },
+  });
+  if (error) throw error;
+}
+
+export async function requestPasswordReset(email: string) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+    redirectTo: window.location.origin,
   });
   if (error) throw error;
 }

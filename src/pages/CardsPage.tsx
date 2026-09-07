@@ -104,7 +104,7 @@ export function CardsPage() {
       <PspCheckout
         open={showTopUp}
         currencies={balances.map((b) => b.currency)}
-        defaultCurrency={balances[0]?.currency ?? 'AED'}
+        defaultCurrency={balances[0]?.currency ?? 'USD'}
         defaultMethodId={topUpMethodId}
         onClose={() => setShowTopUp(false)}
       />

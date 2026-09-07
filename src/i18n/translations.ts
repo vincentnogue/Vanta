@@ -32,6 +32,7 @@ export type TranslationKey =
   | 'dash.home.totalBalance' | 'dash.home.sendMoney' | 'dash.home.exchange' | 'dash.home.addRecipient' | 'dash.home.recentActivity' | 'dash.home.pending' | 'dash.home.viewAll' | 'dash.home.welcome'
   | 'dash.send.title' | 'dash.send.step1' | 'dash.send.step2' | 'dash.send.step3' | 'dash.send.step4' | 'dash.send.step5' | 'dash.send.step6' | 'dash.send.step7'
   | 'dash.send.destination' | 'dash.send.amount' | 'dash.send.funding' | 'dash.send.recipient' | 'dash.send.payout' | 'dash.send.quote' | 'dash.send.confirm'
+  | 'dash.send.availableBalance' | 'dash.send.topUpToFund'
   | 'dash.send.youSend' | 'dash.send.fee' | 'dash.send.rate' | 'dash.send.recipientGets' | 'dash.send.delivery' | 'dash.send.sendNow' | 'dash.send.from' | 'dash.send.to' | 'dash.send.selectCountry' | 'dash.send.selectMethod' | 'dash.send.selectRecipient' | 'dash.send.selectPayout' | 'dash.send.noRecipient' | 'dash.send.addNew' | 'dash.send.instant' | 'dash.send.minutes' | 'dash.send.hours' | 'dash.send.back'
   | 'dash.recipients.title' | 'dash.recipients.add' | 'dash.recipients.empty' | 'dash.recipients.name' | 'dash.recipients.country' | 'dash.recipients.method' | 'dash.recipients.lastUsed' | 'dash.recipients.search'
   | 'dash.activity.title' | 'dash.activity.filter' | 'dash.activity.all' | 'dash.activity.completed' | 'dash.activity.pending' | 'dash.activity.failed' | 'dash.activity.id' | 'dash.activity.amount' | 'dash.activity.status' | 'dash.activity.date' | 'dash.activity.recipient' | 'dash.activity.empty'
@@ -48,6 +49,8 @@ export type TranslationKey =
   | 'api.docs.title' | 'api.docs.subtitle' | 'api.docs.endpoints' | 'api.docs.tryIt'
   | 'common.cancel' | 'common.confirm' | 'common.save' | 'common.delete' | 'common.edit' | 'common.close' | 'common.next' | 'common.back' | 'common.search' | 'common.loading' | 'common.success' | 'common.error'
   | 'auth.signin' | 'auth.signup' | 'auth.email' | 'auth.password' | 'auth.signinBtn' | 'auth.signupBtn' | 'auth.welcome' | 'auth.createAccount' | 'auth.haveAccount' | 'auth.noAccount' | 'auth.forgot'
+  | 'auth.forgot.needEmail' | 'auth.forgot.sent' | 'auth.forgot.sending'
+  | 'auth.confirmEmail.title' | 'auth.confirmEmail.subtitle' | 'auth.backToSignin'
   | 'nav.admin'
   | 'quote.title' | 'quote.expires'
   | 'steps.title' | 'steps.subtitle' | 'steps.1.title' | 'steps.1.desc' | 'steps.2.title' | 'steps.2.desc' | 'steps.3.title' | 'steps.3.desc'
@@ -268,6 +271,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.send.destination': 'Where are you sending to?',
     'dash.send.amount': 'How much would you like to send?',
     'dash.send.funding': 'How will you fund this transfer?',
+    'dash.send.availableBalance': 'Available balance',
+    'dash.send.topUpToFund': 'Top up with card',
     'dash.send.recipient': 'Who are you sending to?',
     'dash.send.payout': 'How should they receive it?',
     'dash.send.quote': 'Review your quote',
@@ -417,6 +422,12 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'auth.haveAccount': 'Already have an account?',
     'auth.noAccount': 'Don\u2019t have an account?',
     'auth.forgot': 'Forgot password?',
+    'auth.forgot.needEmail': 'Enter your email above first',
+    'auth.forgot.sent': 'Reset link sent — check your inbox',
+    'auth.forgot.sending': 'Sending...',
+    'auth.confirmEmail.title': 'Check your inbox',
+    'auth.confirmEmail.subtitle': 'We sent a confirmation link to',
+    'auth.backToSignin': 'Back to sign in',
     'auth.feature.transfers': 'International transfers',
     'auth.feature.payments': 'Cross-border payments',
     'auth.feature.balances': 'Multi-currency balances',
@@ -891,6 +902,8 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'dash.send.destination': 'Où envoyez-vous ?',
     'dash.send.amount': 'Combien voulez-vous envoyer ?',
     'dash.send.funding': 'Comment financerez-vous ce transfert ?',
+    'dash.send.availableBalance': 'Solde disponible',
+    'dash.send.topUpToFund': 'Recharger par carte',
     'dash.send.recipient': 'À qui envoyez-vous ?',
     'dash.send.payout': 'Comment doivent-ils le recevoir ?',
     'dash.send.quote': 'Vérifiez votre devis',
@@ -1040,6 +1053,12 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'auth.haveAccount': 'Vous avez déjà un compte ?',
     'auth.noAccount': 'Pas encore de compte ?',
     'auth.forgot': 'Mot de passe oublié ?',
+    'auth.forgot.needEmail': 'Renseigne d\'abord ton email ci-dessus',
+    'auth.forgot.sent': 'Lien envoyé — vérifie ta boîte mail',
+    'auth.forgot.sending': 'Envoi...',
+    'auth.confirmEmail.title': 'Vérifie ta boîte mail',
+    'auth.confirmEmail.subtitle': 'On a envoyé un lien de confirmation à',
+    'auth.backToSignin': 'Retour à la connexion',
     'auth.feature.transfers': 'Virements internationaux',
     'auth.feature.payments': 'Paiements transfrontaliers',
     'auth.feature.balances': 'Soldes multi-devises',
