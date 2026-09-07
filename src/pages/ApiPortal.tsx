@@ -1,78 +1,43 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n/I18nContext';
 import { type Route } from '@/router/RouterContext';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import {
   Code2, Key, FlaskConical, BookOpen, Webhook, ScrollText, BarChart3,
-  Copy, Check, Terminal, Zap, Shield, Globe, ArrowLeftRight, TrendingUp,
+  Copy, Check, Terminal, Zap, Shield, Globe, ArrowLeftRight, TrendingUp, AlertTriangle, Loader2,
 } from 'lucide-react';
-
-type ApiKey = { id: string; env: 'sandbox' | 'production'; key: string; createdAt: string };
-
-const KEYS_STORAGE = 'vanta-api-keys-v1';
-
-function generateKey(env: 'sandbox' | 'production'): string {
-  const bytes = new Uint8Array(12);
-  crypto.getRandomValues(bytes);
-  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-  return `${env === 'production' ? 'vnt_live' : 'vnt_test'}_${hex}`;
-}
-
-function seedKeys(): ApiKey[] {
-  const today = new Date().toISOString().slice(0, 10);
-  return [
-    { id: 'key_sandbox', env: 'sandbox', key: generateKey('sandbox'), createdAt: today },
-    { id: 'key_production', env: 'production', key: generateKey('production'), createdAt: today },
-  ];
-}
-
-function loadKeys(): ApiKey[] {
-  try {
-    const raw = localStorage.getItem(KEYS_STORAGE);
-    if (raw) {
-      const parsed = JSON.parse(raw) as ApiKey[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {
-    // corrupted storage — reseed
-  }
-  return seedKeys();
-}
+import { listApiKeys, createApiKey, revokeApiKey, type ApiKey } from '@/data/apiKeys';
 
 export function ApiPortal() {
   const { t, lang } = useI18n();
   const [activeTab, setActiveTab] = useState<'overview' | 'keys' | 'docs' | 'webhooks' | 'sandbox' | 'logs' | 'usage'>('overview');
   const [copied, setCopied] = useState(false);
   const [codeLang, setCodeLang] = useState<'curl' | 'javascript' | 'python'>('curl');
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>(loadKeys);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [keysLoading, setKeysLoading] = useState(true);
+  const [creatingEnv, setCreatingEnv] = useState<'sandbox' | 'production' | null>(null);
+  const [revealedKey, setRevealedKey] = useState<{ rawKey: string; env: string } | null>(null);
 
-  const persistKeys = (keys: ApiKey[]) => {
-    setApiKeys(keys);
+  useEffect(() => {
+    if (activeTab === 'keys') {
+      listApiKeys().then(setApiKeys).catch(() => setApiKeys([])).finally(() => setKeysLoading(false));
+    }
+  }, [activeTab]);
+
+  const createKey = async (env: 'sandbox' | 'production') => {
+    setCreatingEnv(env);
     try {
-      localStorage.setItem(KEYS_STORAGE, JSON.stringify(keys));
-    } catch {
-      // storage unavailable — keys still work in memory
+      const { key, rawKey } = await createApiKey(env);
+      setApiKeys((ks) => [key, ...ks]);
+      setRevealedKey({ rawKey, env });
+    } finally {
+      setCreatingEnv(null);
     }
   };
 
-  const createKey = () => {
-    const env = apiKeys.some((k) => k.env === 'sandbox') && !apiKeys.some((k) => k.env === 'production')
-      ? 'production'
-      : 'sandbox';
-    persistKeys([
-      ...apiKeys,
-      { id: `key_${Date.now()}`, env, key: generateKey(env), createdAt: new Date().toISOString().slice(0, 10) },
-    ]);
-  };
-
-  const rollKey = (id: string) => {
-    persistKeys(apiKeys.map((k) => (k.id === id
-      ? { ...k, key: generateKey(k.env), createdAt: new Date().toISOString().slice(0, 10) }
-      : k)));
-  };
-
-  const revokeKey = (id: string) => {
-    persistKeys(apiKeys.filter((k) => k.id !== id));
+  const revokeKey = async (id: string) => {
+    setApiKeys((ks) => ks.map((k) => (k.id === id ? { ...k, revokedAt: new Date().toISOString() } : k)));
+    await revokeApiKey(id);
   };
 
   const navItems = [
@@ -262,64 +227,76 @@ print(transfer.id)  # VNT-20260823-000000001`,
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-bold text-vanta-900">{t('api.keys.title')}</h3>
-              <button onClick={createKey} className="btn-primary text-sm">
-                + {t('api.keys.create')}
-              </button>
+              <div className="flex gap-2">
+                <button onClick={() => createKey('sandbox')} disabled={creatingEnv !== null} className="btn-outline text-sm disabled:opacity-50">
+                  {creatingEnv === 'sandbox' ? <Loader2 className="w-4 h-4 animate-spin" /> : null} + {t('api.keys.sandbox')}
+                </button>
+                <button onClick={() => createKey('production')} disabled={creatingEnv !== null} className="btn-primary text-sm disabled:opacity-50">
+                  {creatingEnv === 'production' ? <Loader2 className="w-4 h-4 animate-spin" /> : null} + {t('api.keys.production')}
+                </button>
+              </div>
             </div>
 
-            {apiKeys.map((apiKey) => (
-              <div key={apiKey.id} className="card p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      apiKey.env === 'production' ? 'bg-danger-50' : 'bg-accent-50'
-                    }`}>
-                      <Key className={`w-5 h-5 ${apiKey.env === 'production' ? 'text-danger-600' : 'text-accent-600'}`} />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-vanta-900">
-                        {apiKey.env === 'production' ? t('api.keys.production') : t('api.keys.sandbox')}
-                      </div>
-                      <div className="text-xs text-ink-400">
-                        {apiKey.env === 'production' ? 'Live mode' : 'Test mode'} · {t('api.keys.created')} {apiKey.createdAt}
-                      </div>
-                    </div>
-                  </div>
-                  <span className={`badge ${apiKey.env === 'production' ? 'bg-danger-50 text-danger-700' : 'bg-accent-50 text-accent-700'}`}>
-                    {apiKey.env}
-                  </span>
+            {revealedKey && (
+              <div className="rounded-xl border-2 border-warning-300 bg-warning-50 p-5 animate-fade-in">
+                <div className="flex items-start gap-2 text-warning-800 font-semibold text-sm mb-3">
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /> {t('api.keys.revealOnce')}
                 </div>
                 <div className="flex items-center gap-3">
-                  <code className="flex-1 bg-ink-50 rounded-lg px-4 py-3 text-sm font-mono text-ink-700 overflow-x-auto">
-                    {apiKey.key.slice(0, 12)}{'•'.repeat(16)}{apiKey.key.slice(-4)}
+                  <code className="flex-1 bg-white rounded-lg px-4 py-3 text-sm font-mono text-ink-800 overflow-x-auto border border-warning-200">
+                    {revealedKey.rawKey}
                   </code>
-                  <button
-                    onClick={() => copyToClipboard(apiKey.key)}
-                    className="btn-outline px-3 py-3"
-                    aria-label="Copy"
-                  >
+                  <button onClick={() => copyToClipboard(revealedKey.rawKey)} className="btn-outline px-3 py-3" aria-label="Copy">
                     {copied ? <Check className="w-4 h-4 text-success-600" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
-                <div className="flex items-center justify-between mt-3">
-                  <p className="text-xs text-ink-400">{t('api.keys.masked')}</p>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => rollKey(apiKey.id)}
-                      className="text-xs font-semibold text-vanta-700 hover:text-vanta-800"
-                    >
-                      {t('api.keys.roll')}
-                    </button>
-                    <button
-                      onClick={() => revokeKey(apiKey.id)}
-                      className="text-xs font-semibold text-danger-600 hover:text-danger-700"
-                    >
-                      {t('api.keys.revoke')}
-                    </button>
+                <button onClick={() => setRevealedKey(null)} className="mt-3 text-xs font-semibold text-warning-700 hover:text-warning-800">
+                  {t('api.keys.done')}
+                </button>
+              </div>
+            )}
+
+            {keysLoading ? (
+              <div className="py-10 flex items-center justify-center text-ink-400"><Loader2 className="w-5 h-5 animate-spin" /></div>
+            ) : apiKeys.length === 0 ? (
+              <div className="card p-10 text-center text-sm text-ink-400">{t('api.keys.empty')}</div>
+            ) : (
+              apiKeys.map((apiKey) => (
+                <div key={apiKey.id} className={`card p-6 ${apiKey.revokedAt ? 'opacity-50' : ''}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        apiKey.env === 'production' ? 'bg-danger-50' : 'bg-accent-50'
+                      }`}>
+                        <Key className={`w-5 h-5 ${apiKey.env === 'production' ? 'text-danger-600' : 'text-accent-600'}`} />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-vanta-900">
+                          {apiKey.env === 'production' ? t('api.keys.production') : t('api.keys.sandbox')}
+                        </div>
+                        <div className="text-xs text-ink-400">
+                          {apiKey.env === 'production' ? 'Live mode' : 'Test mode'} · {t('api.keys.created')} {apiKey.createdAt.slice(0, 10)}
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`badge ${apiKey.revokedAt ? 'bg-ink-100 text-ink-500' : apiKey.env === 'production' ? 'bg-danger-50 text-danger-700' : 'bg-accent-50 text-accent-700'}`}>
+                      {apiKey.revokedAt ? t('api.keys.revoked') : apiKey.env}
+                    </span>
+                  </div>
+                  <code className="block bg-ink-50 rounded-lg px-4 py-3 text-sm font-mono text-ink-700">
+                    {apiKey.keyPrefix}{'•'.repeat(20)}
+                  </code>
+                  <div className="flex items-center justify-between mt-3">
+                    <p className="text-xs text-ink-400">{t('api.keys.masked')}</p>
+                    {!apiKey.revokedAt && (
+                      <button onClick={() => revokeKey(apiKey.id)} className="text-xs font-semibold text-danger-600 hover:text-danger-700">
+                        {t('api.keys.revoke')}
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         )}
 

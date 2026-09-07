@@ -46,6 +46,7 @@ export type TranslationKey =
   | 'biz.overview.volume' | 'biz.overview.transactions' | 'biz.overview.success' | 'biz.overview.pending' | 'biz.overview.recent' | 'biz.overview.bulk' | 'biz.overview.payroll' | 'biz.overview.suppliers'
   | 'api.nav.overview' | 'api.nav.keys' | 'api.nav.sandbox' | 'api.nav.docs' | 'api.nav.webhooks' | 'api.nav.logs' | 'api.nav.usage'
   | 'api.keys.title' | 'api.keys.create' | 'api.keys.sandbox' | 'api.keys.production' | 'api.keys.copy' | 'api.keys.masked' | 'api.keys.roll' | 'api.keys.revoke' | 'api.keys.created'
+  | 'api.keys.revealOnce' | 'api.keys.done' | 'api.keys.empty' | 'api.keys.revoked'
   | 'api.docs.title' | 'api.docs.subtitle' | 'api.docs.endpoints' | 'api.docs.tryIt'
   | 'common.cancel' | 'common.confirm' | 'common.save' | 'common.delete' | 'common.edit' | 'common.close' | 'common.next' | 'common.back' | 'common.search' | 'common.loading' | 'common.success' | 'common.error'
   | 'auth.signin' | 'auth.signup' | 'auth.email' | 'auth.password' | 'auth.signinBtn' | 'auth.signupBtn' | 'auth.welcome' | 'auth.createAccount' | 'auth.haveAccount' | 'auth.noAccount' | 'auth.forgot'
@@ -394,6 +395,10 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'api.keys.masked': 'Key hidden for security',
     'api.keys.roll': 'Roll key',
     'api.keys.revoke': 'Revoke',
+    'api.keys.revealOnce': 'Copy this key now — it will not be shown again.',
+    'api.keys.done': 'I\'ve copied it',
+    'api.keys.empty': 'No API keys yet. Create a sandbox key to start testing.',
+    'api.keys.revoked': 'revoked',
     'api.keys.created': 'Created',
 
     'api.docs.title': 'API Documentation',
@@ -1041,6 +1046,10 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'api.keys.masked': 'Clé masquée pour sécurité',
     'api.keys.roll': 'Régénérer',
     'api.keys.revoke': 'Révoquer',
+    'api.keys.revealOnce': 'Copie cette clé maintenant — elle ne sera plus jamais affichée.',
+    'api.keys.done': 'Je l\'ai copiée',
+    'api.keys.empty': 'Aucune clé API pour le moment. Crée une clé sandbox pour commencer à tester.',
+    'api.keys.revoked': 'révoquée',
     'api.keys.created': 'Créée le',
 
     'api.docs.title': 'Documentation API',
