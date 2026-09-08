@@ -83,6 +83,12 @@ export type TranslationKey =
   | 'paylink.notFound' | 'paylink.notFoundDesc' | 'paylink.success' | 'paylink.paidTo' | 'paylink.payingTo' | 'paylink.demoNote'
   | 'biz.links.title' | 'biz.links.create' | 'biz.links.amount' | 'biz.links.description' | 'biz.links.descPlaceholder'
   | 'biz.links.copyLink' | 'biz.links.copied' | 'biz.links.archive' | 'biz.links.empty' | 'biz.links.active'
+  | 'biz.payouts.title' | 'biz.payouts.addBank' | 'biz.payouts.request' | 'biz.payouts.noBank'
+  | 'biz.payouts.holder' | 'biz.payouts.bankName' | 'biz.payouts.accountNumber' | 'biz.payouts.amount'
+  | 'biz.payouts.toBank' | 'biz.payouts.available' | 'biz.payouts.insufficient' | 'biz.payouts.empty'
+  | 'biz.payouts.status.requested' | 'biz.payouts.status.processing' | 'biz.payouts.status.paid'
+  | 'biz.payouts.status.failed' | 'biz.payouts.status.cancelled'
+  | 'admin.payouts.title' | 'admin.payouts.empty' | 'admin.payouts.markPaid' | 'admin.payouts.markFailed' | 'admin.payouts.to'
   | 'nav.superadmin' | 'sa.title'
   | 'sa.nav.overview' | 'sa.nav.tenants' | 'sa.nav.transactions' | 'sa.nav.staff' | 'sa.nav.fraud' | 'sa.nav.audit' | 'sa.nav.settings'
   | 'sa.ov.liveFeed' | 'sa.ov.volumeToday' | 'sa.ov.activeTenants' | 'sa.ov.activeUsers' | 'sa.ov.tps' | 'sa.ov.uptime' | 'sa.ov.alerts' | 'sa.ov.volumeByDay' | 'sa.ov.tenantsByPlan'
@@ -638,6 +644,28 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'biz.links.archive': 'Archive',
     'biz.links.empty': 'No payment links yet — create one to start collecting payments from your customers.',
     'biz.links.active': 'Active',
+    'biz.payouts.title': 'Payouts',
+    'biz.payouts.addBank': 'Add bank account',
+    'biz.payouts.request': 'Request payout',
+    'biz.payouts.noBank': 'Add a bank account before requesting a payout.',
+    'biz.payouts.holder': 'Account holder',
+    'biz.payouts.bankName': 'Bank name',
+    'biz.payouts.accountNumber': 'Account number / IBAN',
+    'biz.payouts.amount': 'Amount',
+    'biz.payouts.toBank': 'To bank account',
+    'biz.payouts.available': 'Available balance',
+    'biz.payouts.insufficient': 'Not enough available balance for this payout.',
+    'biz.payouts.empty': 'No payouts yet.',
+    'biz.payouts.status.requested': 'Requested',
+    'biz.payouts.status.processing': 'Processing',
+    'biz.payouts.status.paid': 'Paid',
+    'biz.payouts.status.failed': 'Failed',
+    'biz.payouts.status.cancelled': 'Cancelled',
+    'admin.payouts.title': 'Settlement queue',
+    'admin.payouts.empty': 'No payouts waiting for settlement.',
+    'admin.payouts.markPaid': 'Mark as paid',
+    'admin.payouts.markFailed': 'Mark as failed',
+    'admin.payouts.to': 'to',
     'pay.newCard': 'Use a new card',
     'pay.saveCard': 'Save this card for future payments',
 
@@ -1296,6 +1324,28 @@ export const translations: Record<Language, Partial<Record<TranslationKey, strin
     'biz.links.archive': 'Archiver',
     'biz.links.empty': 'Aucun lien de paiement pour le moment — créez-en un pour encaisser vos clients.',
     'biz.links.active': 'Actif',
+    'biz.payouts.title': 'Reversements',
+    'biz.payouts.addBank': 'Ajouter un compte bancaire',
+    'biz.payouts.request': 'Demander un reversement',
+    'biz.payouts.noBank': 'Ajoutez un compte bancaire avant de demander un reversement.',
+    'biz.payouts.holder': 'Titulaire du compte',
+    'biz.payouts.bankName': 'Nom de la banque',
+    'biz.payouts.accountNumber': 'Numéro de compte / IBAN',
+    'biz.payouts.amount': 'Montant',
+    'biz.payouts.toBank': 'Vers le compte',
+    'biz.payouts.available': 'Solde disponible',
+    'biz.payouts.insufficient': 'Solde disponible insuffisant pour ce reversement.',
+    'biz.payouts.empty': 'Aucun reversement pour le moment.',
+    'biz.payouts.status.requested': 'Demandé',
+    'biz.payouts.status.processing': 'En cours',
+    'biz.payouts.status.paid': 'Payé',
+    'biz.payouts.status.failed': 'Échoué',
+    'biz.payouts.status.cancelled': 'Annulé',
+    'admin.payouts.title': 'File de règlement',
+    'admin.payouts.empty': 'Aucun reversement en attente de règlement.',
+    'admin.payouts.markPaid': 'Marquer comme payé',
+    'admin.payouts.markFailed': 'Marquer comme échoué',
+    'admin.payouts.to': 'vers',
     'pay.newCard': 'Utiliser une nouvelle carte',
     'pay.saveCard': 'Enregistrer cette carte pour les prochains paiements',
 

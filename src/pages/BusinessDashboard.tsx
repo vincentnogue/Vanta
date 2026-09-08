@@ -8,10 +8,23 @@ import {
   Landmark, Users2, Shield, FileBarChart, Settings,
   Upload, Building, TrendingUp, Clock, CheckCircle2, Check, Plus, KeyRound,
   DollarSign, Activity, Globe, Zap, Smartphone, Link2, Copy, Archive, Loader2,
+  ArrowUpRight, X, AlertCircle,
 } from 'lucide-react';
 import { formatCurrency, getCurrencyByCode, currencies as allCurrencies, getFxRate } from '@/data/mockData';
 import { useStore } from '@/data/store';
 import { listPaymentLinks, createPaymentLink, archivePaymentLink, type PaymentLink } from '@/data/paymentLinks';
+import { listBankAccounts, addBankAccount, listPayouts, requestPayout, cancelPayout, type BankAccount, type Payout } from '@/data/payouts';
+
+function payoutStatusLabel(status: Payout['status'], t: (key: never) => string): string {
+  const keys: Record<Payout['status'], string> = {
+    requested: 'biz.payouts.status.requested',
+    processing: 'biz.payouts.status.processing',
+    paid: 'biz.payouts.status.paid',
+    failed: 'biz.payouts.status.failed',
+    cancelled: 'biz.payouts.status.cancelled',
+  };
+  return t(keys[status] as never);
+}
 
 type Tab = 'overview' | 'payments' | 'transfers' | 'recipients' | 'balances' | 'fx' | 'treasury' | 'payroll' | 'team' | 'compliance' | 'reports' | 'settings';
 
@@ -88,6 +101,78 @@ export function BusinessDashboard() {
   const [newLinkCurrency, setNewLinkCurrency] = useState('USD');
   const [newLinkDesc, setNewLinkDesc] = useState('');
   const [creatingLink, setCreatingLink] = useState(false);
+
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
+  const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [payoutsLoading, setPayoutsLoading] = useState(true);
+  const [showAddBank, setShowAddBank] = useState(false);
+  const [showRequestPayout, setShowRequestPayout] = useState(false);
+  const [bankHolder, setBankHolder] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankNumber, setBankNumber] = useState('');
+  const [bankCurrency, setBankCurrency] = useState('USD');
+  const [payoutAmount, setPayoutAmount] = useState('');
+  const [payoutBankId, setPayoutBankId] = useState('');
+  const [payoutError, setPayoutError] = useState<string | null>(null);
+  const [savingBank, setSavingBank] = useState(false);
+  const [requestingPayout, setRequestingPayout] = useState(false);
+
+  useEffect(() => {
+    if (tab === 'payments' || tab === 'transfers') {
+      listPaymentLinks().then(setLinks).catch(() => setLinks([])).finally(() => setLinksLoading(false));
+      Promise.all([listBankAccounts(), listPayouts()])
+        .then(([banks, pyts]) => {
+          setBankAccounts(banks);
+          setPayouts(pyts);
+          if (banks[0]) setPayoutBankId(banks[0].id);
+        })
+        .catch(() => {})
+        .finally(() => setPayoutsLoading(false));
+    }
+  }, [tab]);
+
+  const handleAddBank = async () => {
+    if (!bankHolder.trim() || !bankName.trim() || !bankNumber.trim()) return;
+    setSavingBank(true);
+    try {
+      const acc = await addBankAccount({ accountHolder: bankHolder, bankName, accountNumber: bankNumber, currency: bankCurrency });
+      setBankAccounts((bs) => [acc, ...bs]);
+      setPayoutBankId(acc.id);
+      setShowAddBank(false);
+      setBankHolder('');
+      setBankName('');
+      setBankNumber('');
+    } finally {
+      setSavingBank(false);
+    }
+  };
+
+  const handleRequestPayout = async () => {
+    const amount = parseFloat(payoutAmount);
+    if (!amount || amount <= 0 || !payoutBankId) return;
+    setPayoutError(null);
+    setRequestingPayout(true);
+    try {
+      const bank = bankAccounts.find((b) => b.id === payoutBankId);
+      const currency = bank?.currency ?? bankCurrency;
+      const result = await requestPayout(payoutBankId, amount, currency);
+      if (!result.ok) {
+        setPayoutError(result.error === 'insufficient' ? t('biz.payouts.insufficient') : result.error ?? 'Error');
+        return;
+      }
+      const fresh = await listPayouts();
+      setPayouts(fresh);
+      setShowRequestPayout(false);
+      setPayoutAmount('');
+    } finally {
+      setRequestingPayout(false);
+    }
+  };
+
+  const handleCancelPayout = async (p: Payout) => {
+    setPayouts((ps) => ps.map((x) => (x.id === p.id ? { ...x, status: 'cancelled' as const } : x)));
+    await cancelPayout(p);
+  };
 
   useEffect(() => {
     if (tab === 'payments' || tab === 'transfers') {
@@ -368,6 +453,129 @@ export function BusinessDashboard() {
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Payouts / settlement */}
+              <div className="card p-6 sm:col-span-2 lg:col-span-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <ArrowUpRight className="w-5 h-5 text-vanta-600" />
+                    <h3 className="font-display text-lg font-bold text-vanta-900">{t('biz.payouts.title')}</h3>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setShowAddBank((v) => !v)} className="btn-outline text-sm">
+                      <Building className="w-4 h-4" /> {t('biz.payouts.addBank')}
+                    </button>
+                    <button
+                      onClick={() => setShowRequestPayout((v) => !v)}
+                      disabled={bankAccounts.length === 0}
+                      className="btn-primary text-sm disabled:opacity-50"
+                    >
+                      <ArrowUpRight className="w-4 h-4" /> {t('biz.payouts.request')}
+                    </button>
+                  </div>
+                </div>
+
+                {bankAccounts.length === 0 && !showAddBank && (
+                  <p className="text-sm text-ink-400 mb-4">{t('biz.payouts.noBank')}</p>
+                )}
+
+                {showAddBank && (
+                  <div className="rounded-xl border border-ink-200 bg-ink-50/40 p-4 mb-4 animate-fade-in space-y-3">
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('biz.payouts.holder')}</label>
+                        <input value={bankHolder} onChange={(e) => setBankHolder(e.target.value)} className="input py-2.5" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('biz.payouts.bankName')}</label>
+                        <input value={bankName} onChange={(e) => setBankName(e.target.value)} className="input py-2.5" />
+                      </div>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('biz.payouts.accountNumber')}</label>
+                        <input value={bankNumber} onChange={(e) => setBankNumber(e.target.value)} placeholder="IBAN, account no." className="input py-2.5" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-ink-500 mb-1.5 block">Devise</label>
+                        <select value={bankCurrency} onChange={(e) => setBankCurrency(e.target.value)} className="input py-2.5">
+                          {['USD', 'EUR', 'GBP', 'XAF', 'XOF', 'NGN'].map((c) => (
+                            <option key={c} value={c}>{getCurrencyByCode(c)?.flag} {c}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <button onClick={handleAddBank} disabled={savingBank} className="btn-primary text-sm disabled:opacity-50">
+                      {savingBank ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} {t('biz.payouts.addBank')}
+                    </button>
+                  </div>
+                )}
+
+                {showRequestPayout && (
+                  <div className="rounded-xl border border-ink-200 bg-ink-50/40 p-4 mb-4 animate-fade-in space-y-3">
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('biz.payouts.amount')}</label>
+                        <input type="number" min="1" step="0.01" value={payoutAmount} onChange={(e) => setPayoutAmount(e.target.value)} className="input py-2.5" />
+                      </div>
+                      <div className="w-56">
+                        <label className="text-xs font-semibold text-ink-500 mb-1.5 block">{t('biz.payouts.toBank')}</label>
+                        <select value={payoutBankId} onChange={(e) => setPayoutBankId(e.target.value)} className="input py-2.5">
+                          {bankAccounts.map((b) => (
+                            <option key={b.id} value={b.id}>{b.bankName} •••{b.accountNumber.slice(-4)} ({b.currency})</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    {(() => {
+                      const bank = bankAccounts.find((b) => b.id === payoutBankId);
+                      const bal = balances.find((b) => b.currency === (bank?.currency ?? bankCurrency));
+                      return (
+                        <p className="text-xs text-ink-400">
+                          {t('biz.payouts.available')}: {formatCurrency(bal?.available ?? 0, bank?.currency ?? bankCurrency)}
+                        </p>
+                      );
+                    })()}
+                    {payoutError && (
+                      <p className="text-xs text-danger-600 font-medium flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {payoutError}
+                      </p>
+                    )}
+                    <button onClick={handleRequestPayout} disabled={requestingPayout} className="btn-primary text-sm disabled:opacity-50">
+                      {requestingPayout ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowUpRight className="w-4 h-4" />} {t('biz.payouts.request')}
+                    </button>
+                  </div>
+                )}
+
+                {payoutsLoading ? (
+                  <div className="py-6 flex items-center justify-center text-ink-400"><Loader2 className="w-5 h-5 animate-spin" /></div>
+                ) : payouts.length === 0 ? (
+                  <p className="text-sm text-ink-400">{t('biz.payouts.empty')}</p>
+                ) : (
+                  <div className="space-y-2">
+                    {payouts.map((p) => (
+                      <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl border border-ink-100">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-ink-900 text-sm">{formatCurrency(p.amount, p.currency)}</div>
+                          <div className="text-xs text-ink-400 font-mono">{p.id}</div>
+                        </div>
+                        <span className={`badge text-[10px] ${
+                          p.status === 'paid' ? 'bg-vanta-500 text-white'
+                          : p.status === 'requested' || p.status === 'processing' ? 'bg-warning-50 text-warning-700'
+                          : p.status === 'failed' ? 'bg-danger-50 text-danger-600'
+                          : 'bg-ink-100 text-ink-500'
+                        }`}>
+                          {payoutStatusLabel(p.status, t)}
+                        </span>
+                        {p.status === 'requested' && (
+                          <button onClick={() => handleCancelPayout(p)} className="p-1.5 rounded-lg text-ink-400 hover:bg-danger-50 hover:text-danger-500 transition-colors" title={t('common.cancel')}>
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               {pspStats.map((s, i) => (
                 <div key={i} className="card p-4">
                   <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${toneClasses[s.tone]} flex items-center justify-center mb-3`}>

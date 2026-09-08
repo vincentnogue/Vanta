@@ -12,6 +12,7 @@ import { formatCurrency } from '@/data/mockData';
 import { useStore } from '@/data/store';
 import { fetchCustomers, fetchPendingKyc, adminApproveKyc, adminRejectKyc, type AdminCustomer, type AdminKycCase } from '@/data/admin';
 import { fetchPspStatus, type PspConnector } from '@/data/pspStatus';
+import { fetchPendingPayouts, markPayoutPaid, markPayoutFailed, type AdminPayout } from '@/data/payouts';
 import { supabase } from '@/lib/supabase';
 
 type Tab = 'overview' | 'transactions' | 'customers' | 'compliance' | 'providers' | 'treasury' | 'reconciliation' | 'support';
@@ -70,6 +71,31 @@ export function AdminPage() {
   const [connectorsLoading, setConnectorsLoading] = useState(true);
   const [platformRevenue, setPlatformRevenue] = useState<{ currency: string; total: number }[]>([]);
   const [revenueLoading, setRevenueLoading] = useState(true);
+
+  const [pendingPayouts, setPendingPayouts] = useState<AdminPayout[]>([]);
+  const [payoutsLoading, setPayoutsLoading] = useState(true);
+  const [payoutActingOn, setPayoutActingOn] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tab === 'reconciliation') {
+      setPayoutsLoading(true);
+      fetchPendingPayouts().then(setPendingPayouts).catch(() => setPendingPayouts([])).finally(() => setPayoutsLoading(false));
+    }
+  }, [tab]);
+
+  const handleMarkPaid = async (p: AdminPayout) => {
+    setPayoutActingOn(p.id);
+    await markPayoutPaid(p);
+    setPendingPayouts((ps) => ps.filter((x) => x.id !== p.id));
+    setPayoutActingOn(null);
+  };
+
+  const handleMarkFailed = async (p: AdminPayout) => {
+    setPayoutActingOn(p.id);
+    await markPayoutFailed(p, 'Marked failed by admin');
+    setPendingPayouts((ps) => ps.filter((x) => x.id !== p.id));
+    setPayoutActingOn(null);
+  };
 
   useEffect(() => {
     if (tab === 'providers') {
@@ -436,25 +462,64 @@ export function AdminPage() {
         )}
 
         {tab === 'reconciliation' && (
-          <div className="space-y-3">
-            {exceptions.map((e) => (
-              <div key={e.id} className="card p-5 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-warning-50 flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-warning-600" />
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-display text-sm font-bold text-ink-500 uppercase tracking-wider mb-3">{t('admin.payouts.title')}</h3>
+              {payoutsLoading ? (
+                <div className="p-6 flex items-center justify-center text-ink-400"><Loader2 className="w-5 h-5 animate-spin" /></div>
+              ) : pendingPayouts.length === 0 ? (
+                <div className="card p-6 text-sm text-ink-400">{t('admin.payouts.empty')}</div>
+              ) : (
+                <div className="space-y-3">
+                  {pendingPayouts.map((p) => (
+                    <div key={p.id} className="card p-5 flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-vanta-50 flex items-center justify-center shrink-0">
+                        <DollarSign className="w-5 h-5 text-vanta-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-ink-900 text-sm">
+                          {formatCurrency(p.amount, p.currency)} <span className="text-ink-400 font-normal">{t('admin.payouts.to')} {p.userName}</span>
+                        </div>
+                        <div className="text-xs text-ink-400 font-mono">{p.id} · {p.bankName} •••{p.accountNumber.slice(-4)}</div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button onClick={() => handleMarkPaid(p)} disabled={payoutActingOn === p.id} className="btn-primary text-xs px-3 py-2 disabled:opacity-50">
+                          {payoutActingOn === p.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                          {t('admin.payouts.markPaid')}
+                        </button>
+                        <button onClick={() => handleMarkFailed(p)} disabled={payoutActingOn === p.id} className="btn-outline text-xs px-3 py-2 disabled:opacity-50">
+                          <X className="w-3.5 h-3.5" /> {t('admin.payouts.markFailed')}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-ink-900 text-sm">{e.type}</div>
-                  <div className="text-xs text-ink-400 font-mono">{e.id} · {e.detail}</div>
-                </div>
-                {e.resolved ? (
-                  <span className="badge bg-vanta-500 text-white"><Check className="w-3 h-3" /> {t('sup.resolved')}</span>
-                ) : (
-                  <button onClick={() => setExceptions(exceptions.map((x) => x.id === e.id ? { ...x, resolved: true } : x))} className="btn-primary text-xs px-3 py-2">
-                    {t('admin.comp.review')}
-                  </button>
-                )}
+              )}
+            </div>
+
+            <div>
+              <h3 className="font-display text-sm font-bold text-ink-500 uppercase tracking-wider mb-3">{t('admin.nav.reconciliation')}</h3>
+              <div className="space-y-3">
+                {exceptions.map((e) => (
+                  <div key={e.id} className="card p-5 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-warning-50 flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-warning-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-ink-900 text-sm">{e.type}</div>
+                      <div className="text-xs text-ink-400 font-mono">{e.id} · {e.detail}</div>
+                    </div>
+                    {e.resolved ? (
+                      <span className="badge bg-vanta-500 text-white"><Check className="w-3 h-3" /> {t('sup.resolved')}</span>
+                    ) : (
+                      <button onClick={() => setExceptions(exceptions.map((x) => x.id === e.id ? { ...x, resolved: true } : x))} className="btn-primary text-xs px-3 py-2">
+                        {t('admin.comp.review')}
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         )}
 
