@@ -67,6 +67,7 @@ export function DashboardLayout({ children, navItems, activeRoute }: { children:
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1.5 rounded-lg text-ink-400 hover:bg-white/10"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -147,6 +148,7 @@ export function DashboardLayout({ children, navItems, activeRoute }: { children:
             <button
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-2 rounded-lg text-ink-600 hover:bg-ink-100"
+              aria-label={t('dash.openMenu')}
             >
               <Menu className="w-5 h-5" />
             </button>

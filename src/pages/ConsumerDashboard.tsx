@@ -638,7 +638,7 @@ function Recipients() {
             <form onSubmit={handleAdd} className="card p-6 w-full max-w-md space-y-4 animate-pop">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-bold text-vanta-900">{t('rec.form.title')}</h2>
-                <button type="button" onClick={() => setShowForm(false)} className="p-1.5 rounded-lg hover:bg-ink-100">
+                <button type="button" onClick={() => setShowForm(false)} className="p-1.5 rounded-lg hover:bg-ink-100" aria-label={t('common.close')}>
                   <X className="w-4 h-4" />
                 </button>
               </div>

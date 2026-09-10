@@ -252,7 +252,7 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
       <div className="card w-full max-w-md overflow-hidden animate-pop shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="bg-vanta-950 px-6 pt-6 pb-7 relative">
-          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg text-ink-400 hover:bg-white/10 hover:text-white transition-colors">
+          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg text-ink-400 hover:bg-white/10 hover:text-white transition-colors" aria-label={t('common.close')}>
             <X className="w-4 h-4" />
           </button>
           <Logo dark size="sm" />
