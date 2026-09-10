@@ -563,23 +563,23 @@ export function LandingPage() {
             ))}
           </div>
 
-          {/* Payment funnel */}
+          {/* Payment funnel — illustrative flow-through rates, not a claim of live volume */}
           <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 p-6 sm:p-8">
             <h3 className="font-display text-lg font-bold text-white mb-6">{t('psp.funnel')}</h3>
             <div className="flex flex-wrap items-center gap-4">
               {[
-                { stage: lang === 'fr' ? 'Initié' : 'Initiated', count: 1847 },
-                { stage: lang === 'fr' ? 'Contrôle conformité' : 'Compliance check', count: 1847 },
-                { stage: lang === 'fr' ? 'FX routé' : 'FX routed', count: 1839 },
-                { stage: lang === 'fr' ? 'Paiement envoyé' : 'Payout sent', count: 1832 },
-                { stage: lang === 'fr' ? 'Complété' : 'Completed', count: 1832 },
+                { stage: lang === 'fr' ? 'Initié' : 'Initiated', pct: 100 },
+                { stage: lang === 'fr' ? 'Contrôle conformité' : 'Compliance check', pct: 100 },
+                { stage: lang === 'fr' ? 'FX routé' : 'FX routed', pct: 99.6 },
+                { stage: lang === 'fr' ? 'Paiement envoyé' : 'Payout sent', pct: 99.2 },
+                { stage: lang === 'fr' ? 'Complété' : 'Completed', pct: 99.2 },
               ].map((s, i, arr) => (
                 <div key={s.stage} className="flex items-center gap-4">
                   <div>
-                    <div className="font-display text-xl font-bold text-accent-400">{s.count.toLocaleString()}</div>
+                    <div className="font-display text-xl font-bold text-accent-400">{s.pct}%</div>
                     <div className="text-xs text-ink-400">{s.stage}</div>
                     <div className="mt-1.5 h-1 rounded-full bg-white/10 overflow-hidden w-24">
-                      <div className="h-full rounded-full bg-accent-500" style={{ width: `${Math.round((s.count / arr[0].count) * 100)}%` }} />
+                      <div className="h-full rounded-full bg-accent-500" style={{ width: `${s.pct}%` }} />
                     </div>
                   </div>
                   {i < arr.length - 1 && <Repeat className="w-4 h-4 text-ink-500 flex-shrink-0" />}
