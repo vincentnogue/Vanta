@@ -174,6 +174,23 @@ export function BusinessDashboard() {
     await cancelPayout(p);
   };
 
+  const handleExportCsv = () => {
+    const header = ['ID', 'Date', 'Recipient', 'Country', 'Amount', 'Currency', 'Status'];
+    const rows = transactions.map((tx) => [
+      tx.id, tx.date, tx.recipientName, tx.recipientCountry, String(tx.amount), tx.currency, tx.status,
+    ]);
+    const csv = [header, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `vanta-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   useEffect(() => {
     if (tab === 'payments' || tab === 'transfers') {
       listPaymentLinks().then(setLinks).catch(() => setLinks([])).finally(() => setLinksLoading(false));
@@ -370,8 +387,12 @@ export function BusinessDashboard() {
           <>
             <div className="flex items-center justify-between">
               <div className="flex gap-3">
-                <button className="btn-primary text-sm"><Plus className="w-4 h-4" /> {t('biz.nav.payments')}</button>
-                <button className="btn-outline text-sm"><Upload className="w-4 h-4" /> CSV</button>
+                <button onClick={() => setShowCreateLink(true)} className="btn-primary text-sm">
+                  <Plus className="w-4 h-4" /> {t('biz.nav.payments')}
+                </button>
+                <button onClick={handleExportCsv} className="btn-outline text-sm">
+                  <Upload className="w-4 h-4" /> CSV
+                </button>
               </div>
               <div className="flex items-center gap-2 text-sm text-ink-500">
                 <Activity className="w-4 h-4 text-success-500" />

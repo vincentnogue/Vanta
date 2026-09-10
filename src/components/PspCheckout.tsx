@@ -4,7 +4,7 @@ import { useI18n } from '@/i18n/I18nContext';
 import { getCurrencyByCode, formatCurrency } from '@/data/mockData';
 import { detectBrand, formatCardNumber, formatExpiry } from '@/data/cardUtils';
 import { CardBrandMark, ApplePayMark, GooglePayMark } from '@/components/CardBrandMark';
-import { addMoney, addPaymentMethod, refreshStore, useStore } from '@/data/store';
+import { addMoney, addPaymentMethod, pollStoreForUpdate, useStore } from '@/data/store';
 import { createPaymentIntent, chargeSavedCard, confirmSavedCard } from '@/data/payments';
 import { getStripe, isStripeConfigured } from '@/lib/stripe';
 import { getCurrentUser } from '@/data/auth';
@@ -85,12 +85,13 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
       setStripeErrorMsg(null);
       setCard({ number: '', expiry: '', cvc: '' });
       setMethod('card');
+      setCurrency(defaultCurrency);
       const preferred = paymentMethods.find((p) => p.id === defaultMethodId)
         ?? paymentMethods.find((p) => p.isDefault);
       setSelectedCardId(preferred?.id ?? 'new');
       setSaveCard(true);
     }
-  }, [open, defaultMethodId, paymentMethods]);
+  }, [open, defaultCurrency, defaultMethodId, paymentMethods]);
 
   useEffect(() => {
     if (!open) return;
@@ -130,8 +131,8 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
           return;
         }
         setPhase('success');
+        pollStoreForUpdate();
         setTimeout(() => {
-          refreshStore();
           onClose();
           setAmount('');
         }, 2200);
@@ -184,10 +185,10 @@ function PspCheckoutInner({ open, currencies, defaultCurrency, defaultMethodId, 
           }
           setPhase('success');
           // The Stripe webhook — not this client — is what actually credits the
-          // balance and writes the transaction. Give it a moment, then re-pull
-          // real data from Supabase instead of guessing the new balance locally.
+          // balance and writes the transaction. Poll a few times instead of a
+          // single delayed refresh, since webhook delivery timing varies.
+          pollStoreForUpdate();
           setTimeout(() => {
-            refreshStore();
             onClose();
             setAmount('');
           }, 2200);

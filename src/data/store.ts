@@ -144,6 +144,19 @@ export function refreshStore() {
   if (currentUserId) loadForUser(currentUserId);
 }
 
+/** Stripe webhooks don't always land within a fixed delay — poll a few
+ * times instead of refreshing once and hoping. Used after a real card
+ * payment to reflect the balance the webhook (not this client) credits. */
+export function pollStoreForUpdate(attempts = 4, delayMs = 1800) {
+  let count = 0;
+  const tick = () => {
+    refreshStore();
+    count += 1;
+    if (count < attempts) setTimeout(tick, delayMs);
+  };
+  setTimeout(tick, delayMs);
+}
+
 export function nextTxId(): string {
   const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const rand = Math.floor(Math.random() * 900000000 + 100000000);

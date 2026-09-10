@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useI18n } from '@/i18n/I18nContext';
 import type { Language } from '@/i18n/translations';
 import { useRouter, type Route } from '@/router/RouterContext';
@@ -206,6 +206,7 @@ function SendMoney() {
   const [sendAmount, setSendAmount] = useState('');
   const { recipients, balances } = useStore();
   const [sendCurrency, setSendCurrency] = useState(() => balances[0]?.currency ?? 'USD');
+  const didSyncSendCurrency = useRef(false);
   const [recipient, setRecipient] = useState('');
   const [payoutMethod, setPayoutMethod] = useState('');
   const [success, setSuccess] = useState(false);
@@ -214,6 +215,18 @@ function SendMoney() {
   const { user } = useAuth();
   const kycVerified = user?.kycStatus === 'verified';
   const [insufficient, setInsufficient] = useState(false);
+
+  // balances load asynchronously from Supabase; if this component mounted
+  // before they arrived, sync the default currency once real data lands
+  // instead of staying stuck on the initial guess.
+  useEffect(() => {
+    if (!didSyncSendCurrency.current && balances.length > 0) {
+      didSyncSendCurrency.current = true;
+      if (!balances.some((b) => b.currency === sendCurrency)) {
+        setSendCurrency(balances[0].currency);
+      }
+    }
+  }, [balances, sendCurrency]);
 
   const navItems = [
     { route: 'consumer' as Route, label: t('dash.nav.home'), icon: Home },
@@ -886,6 +899,17 @@ function Exchange() {
   const [amount, setAmount] = useState('');
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
+  const didSyncFromCurrency = useRef(false);
+
+  useEffect(() => {
+    if (!didSyncFromCurrency.current && balances.length > 0) {
+      didSyncFromCurrency.current = true;
+      if (!balances.some((b) => b.currency === fromCurrency)) {
+        setFromCurrency(balances[0].currency);
+        if (balances[1] && balances[1].currency !== toCurrency) setToCurrency(balances[1].currency);
+      }
+    }
+  }, [balances, fromCurrency, toCurrency]);
 
   const fromBalance = balances.find((b) => b.currency === fromCurrency);
   const hasFunds = !!fromBalance && fromBalance.available > 0;
